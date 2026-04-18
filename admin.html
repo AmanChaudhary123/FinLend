@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FinLend — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<!-- jsPDF for legal document generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07091a;--card:#0d1228;--card2:#101526;--field:#111627;
+  --royal:#1a237e;--gold:#c9a84c;--gold2:#ddb96a;--gold-dim:rgba(201,168,76,.5);
+  --gold-faint:rgba(201,168,76,.1);--ivory:#f5f0e8;--muted:rgba(255,255,255,.38);
+  --border:rgba(201,168,76,.15);--border2:rgba(255,255,255,.07);
+  --green:#6fbf7a;--red:#e07070;--amber:#ffb74d;--blue:#5c8fe8;
+  --sidebar:230px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'Raleway',sans-serif;color:var(--ivory);display:flex}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2);border-radius:2px}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:linear-gradient(180deg,#0d1432 0%,#080c1e 100%);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;height:100vh;
+  position:relative;z-index:100;
+}
+.sidebar::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 120% 40% at 50% 0%,rgba(26,35,126,.5) 0%,transparent 60%);
+  pointer-events:none;}
+.sb-brand{padding:22px 20px 18px;border-bottom:1px solid var(--border);position:relative}
+.sb-logo{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:700;color:var(--gold);letter-spacing:.1em}
+.sb-logo span{font-size:.58rem;letter-spacing:.2em;color:rgba(224,112,112,.7);display:block;margin-top:2px;text-transform:uppercase}
+.sb-nav{flex:1;padding:14px 0;overflow-y:auto}
+.nav-group{font-size:.57rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(201,168,76,.3);padding:12px 20px 5px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;
+  font-size:.81rem;font-weight:500;letter-spacing:.03em;color:var(--muted);
+  transition:all .2s;position:relative;border:none;background:none;width:100%;text-align:left}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.6;transition:opacity .2s}
+.nav-item:hover{color:var(--ivory);background:rgba(255,255,255,.04)}
+.nav-item.active{color:var(--gold);background:var(--gold-faint)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold)}
+.nav-item.active svg{opacity:1}
+.nb{margin-left:auto;background:var(--red);color:#fff;font-size:.57rem;font-weight:700;padding:2px 6px;border-radius:10px}
+.nb.gold{background:var(--gold);color:#07091a}
+.sb-bottom{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.admin-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),#c62828);
+  display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0}
+.admin-name{font-size:.78rem;font-weight:600;color:var(--ivory)}
+.admin-role{font-size:.6rem;color:rgba(224,112,112,.7);letter-spacing:.08em;text-transform:uppercase}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.main::before{content:'';position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(26,35,126,.3) 0%,transparent 60%),
+             linear-gradient(180deg,#07091a 0%,#0b0f24 100%);}
+.topbar{height:54px;flex-shrink:0;background:rgba(13,18,40,.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 26px}
+.topbar-title{font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;color:var(--ivory);letter-spacing:.06em}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.t-btn{padding:6px 14px;border-radius:4px;font-family:'Cinzel',serif;font-size:.68rem;font-weight:600;
+  letter-spacing:.1em;cursor:pointer;border:1px solid var(--border);background:var(--gold-faint);color:var(--gold);transition:all .2s}
+.t-btn:hover{background:rgba(201,168,76,.18);border-color:var(--gold-dim)}
+.t-btn.red{background:rgba(224,112,112,.1);border-color:rgba(224,112,112,.3);color:var(--red)}
+.content{flex:1;overflow-y:auto;padding:22px 26px}
+
+/* ── SECTIONS ── */
+.section{display:none}.section.active{display:block}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.sec-title{font-family:'Cinzel',serif;font-size:1.05rem;font-weight:600;color:var(--ivory);letter-spacing:.05em}
+.sec-title span{font-size:.7rem;color:var(--gold-dim);font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;margin-left:8px}
+
+/* ── STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px 18px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5}
+.sc-lbl{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:6px}
+.sc-val{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:600;color:var(--ivory);line-height:1}
+.sc-sub{font-size:.68rem;color:var(--muted);margin-top:4px}
+
+/* ── PANEL ── */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:18px}
+.ph{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pt{font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;letter-spacing:.07em;color:var(--ivory)}
+.pb{padding:18px}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold-dim);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.tbl td{font-size:.8rem;color:rgba(255,255,255,.7);padding:10px 12px;border-bottom:1px solid var(--border2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.tbl td .mono{font-family:'Cinzel',serif;color:var(--ivory);font-size:.78rem}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.62rem;font-weight:700;letter-spacing:.07em;white-space:nowrap}
+.badge.green{background:rgba(111,191,122,.1);color:var(--green);border:1px solid rgba(111,191,122,.25)}
+.badge.red{background:rgba(224,112,112,.1);color:var(--red);border:1px solid rgba(224,112,112,.25)}
+.badge.amber{background:rgba(255,183,77,.1);color:var(--amber);border:1px solid rgba(255,183,77,.25)}
+.badge.blue{background:rgba(92,143,232,.1);color:var(--blue);border:1px solid rgba(92,143,232,.25)}
+.badge.gold{background:var(--gold-faint);color:var(--gold);border:1px solid var(--border)}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 14px;border-radius:4px;font-family:'Cinzel',serif;font-size:.67rem;
+  font-weight:600;letter-spacing:.1em;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
+.btn-gold{background:linear-gradient(135deg,#b8933e,#ddb96a);color:#07091a}
+.btn-gold:hover{opacity:.88;transform:translateY(-1px)}
+.btn-green{background:rgba(111,191,122,.15);border:1px solid rgba(111,191,122,.3);color:var(--green)}
+.btn-green:hover{background:rgba(111,191,122,.25)}
+.btn-red{background:rgba(224,112,112,.15);border:1px solid rgba(224,112,112,.3);color:var(--red)}
+.btn-red:hover{background:rgba(224,112,112,.25)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--gold-dim);color:var(--ivory)}
+.btn-blue{background:rgba(92,143,232,.15);border:1px solid rgba(92,143,232,.3);color:var(--blue)}
+.btn-blue:hover{background:rgba(92,143,232,.25)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.btn-sm{padding:5px 10px;font-size:.6rem}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:#0d1228;border:1px solid rgba(201,168,76,.22);border-radius:6px;
+  padding:28px;width:min(680px,94vw);max-height:90vh;overflow-y:auto;
+  box-shadow:0 24px 64px rgba(0,0,0,.7);transform:scale(.96) translateY(8px);transition:transform .3s}
+.modal-bg.open .modal{transform:scale(1) translateY(0)}
+.modal-title{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);letter-spacing:.06em;margin-bottom:4px}
+.modal-sub{font-family:'Cormorant Garamond',serif;font-style:italic;color:rgba(255,255,255,.38);font-size:.86rem;margin-bottom:18px}
+
+/* ── KYC IMAGE VIEW ── */
+.kyc-img-wrap{
+  border:1px solid var(--border);border-radius:6px;overflow:hidden;
+  background:var(--field);display:flex;align-items:center;justify-content:center;
+  min-height:180px;position:relative;cursor:pointer;
+}
+.kyc-img-wrap img{width:100%;height:200px;object-fit:cover;display:block}
+.kyc-img-wrap .no-doc{text-align:center;padding:30px;color:var(--muted);font-size:.82rem}
+.kyc-img-wrap:hover::after{content:'🔍 Click to enlarge';position:absolute;inset:0;
+  background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;color:var(--ivory);letter-spacing:.06em}
+.kyc-img-actions{display:flex;gap:8px;margin-top:8px}
+
+/* ── LOAN DETAIL CARD ── */
+.loan-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+.ld-item .ld-l{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:2px}
+.ld-item .ld-v{font-family:'Cinzel',serif;font-size:.85rem;color:var(--ivory)}
+
+/* ── CHAT ── */
+.chat-wrap{display:flex;flex-direction:column;height:380px;background:var(--card2);
+  border-radius:6px;border:1px solid var(--border);overflow:hidden}
+.chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.chat-msg{max-width:72%;padding:9px 13px;border-radius:5px;font-size:.82rem;line-height:1.5}
+.chat-msg.admin{align-self:flex-end;background:rgba(224,112,112,.12);border:1px solid rgba(224,112,112,.2);color:var(--ivory)}
+.chat-msg.user{align-self:flex-start;background:rgba(201,168,76,.08);border:1px solid var(--border);color:rgba(255,255,255,.8)}
+.chat-msg.system{align-self:center;background:rgba(255,255,255,.04);border:1px solid var(--border2);
+  color:var(--muted);font-size:.7rem;font-family:'Cormorant Garamond',serif;font-style:italic;max-width:90%;text-align:center}
+.chat-msg .who{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;opacity:.6}
+.chat-msg .ts{font-size:.6rem;opacity:.35;margin-top:3px;text-align:right;font-family:'Cormorant Garamond',serif;font-style:italic}
+.chat-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+.chat-input{flex:1;padding:8px 12px;background:var(--field);border:1px solid var(--border2);
+  border-radius:4px;color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.84rem;outline:none}
+.chat-input:focus{border-color:rgba(201,168,76,.4)}
+
+/* ── PROGRESS ── */
+.progress-bar{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin:4px 0}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .5s ease}
+
+/* ── FORM ── */
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.fg label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim)}
+.fg select,.fg input,.fg textarea{padding:9px 12px;background:var(--field);border:1px solid var(--border2);
+  border-radius:4px;color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s}
+.fg select:focus,.fg input:focus,.fg textarea:focus{border-color:rgba(201,168,76,.4)}
+.fg select option{background:#0d1228}
+.fg textarea{resize:vertical;min-height:60px}
+
+/* ── FULLSCREEN IMG OVERLAY ── */
+.img-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.92);
+  display:flex;align-items:center;justify-content:center;cursor:zoom-out;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.img-overlay.open{opacity:1;pointer-events:all}
+.img-overlay img{max-width:90vw;max-height:90vh;border-radius:4px;box-shadow:0 0 60px rgba(0,0,0,.8)}
+.img-overlay-close{position:fixed;top:20px;right:24px;font-size:1.6rem;color:rgba(255,255,255,.6);cursor:pointer;
+  background:rgba(0,0,0,.5);border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:rgba(13,18,40,.97);border-radius:40px;padding:9px 20px;font-size:.78rem;
+  opacity:0;pointer-events:none;transition:all .3s;z-index:9999;white-space:nowrap;
+  font-family:'Raleway',sans-serif;display:flex;align-items:center;gap:7px}
+.toast::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.toast.err::before{background:var(--red)}.toast.info::before{background:var(--gold)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border:1px solid rgba(111,191,122,.3);color:#a8e4b0}
+.toast.err{border:1px solid rgba(224,112,112,.3);color:#f0a8a8}
+.toast.info{border:1px solid var(--border);color:var(--ivory)}
+
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.15);
+  border-top-color:var(--gold);border-radius:50%;animation:sp .55s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.empty{text-align:center;padding:36px 20px;color:var(--muted)}
+.empty-icon{font-size:2rem;margin-bottom:8px;opacity:.3}
+.empty-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.06em;
+  cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .2s}
+.filter-btn.active,.filter-btn:hover{border-color:var(--gold-dim);color:var(--gold);background:var(--gold-faint)}
+
+/* ── PDF GEN PROGRESS ── */
+.pdf-progress{display:none;background:rgba(201,168,76,.06);border:1px solid var(--border);
+  border-radius:6px;padding:14px 18px;margin-top:12px}
+.pdf-progress-bar{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin:8px 0}
+.pdf-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));
+  border-radius:2px;width:0%;transition:width .3s}
+.pdf-status{font-size:.72rem;color:var(--gold-dim);letter-spacing:.04em}
+
+/* ══ LOGIN SCREEN ══ */
+#loginScreen{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(ellipse 90% 60% at 10% 0%,rgba(198,40,40,.35) 0%,transparent 60%),
+    radial-gradient(ellipse 70% 50% at 90% 100%,rgba(198,40,40,.2) 0%,transparent 60%),
+    linear-gradient(180deg,#07091a 0%,#0b0f24 100%);
+}
+#loginScreen::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.025;pointer-events:none;
+}
+.login-orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:-1}
+.login-orb1{width:480px;height:480px;top:-150px;left:-160px;background:radial-gradient(circle,rgba(198,40,40,.4) 0%,transparent 70%)}
+.login-orb2{width:360px;height:360px;bottom:-100px;right:-80px;background:radial-gradient(circle,rgba(198,40,40,.3) 0%,transparent 70%)}
+.login-card{
+  width:min(420px,94vw);background:var(--card);
+  border:1px solid rgba(198,40,40,.25);border-radius:6px;
+  padding:42px 40px 36px;
+  box-shadow:0 0 0 1px rgba(198,40,40,.08),0 40px 100px rgba(0,0,0,.65);
+  animation:rise .85s cubic-bezier(.16,1,.3,1) both;
+  position:relative;
+}
+@keyframes rise{from{opacity:0;transform:translateY(32px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.login-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:6px 6px 0 0;
+  background:linear-gradient(90deg,transparent,#c62828,var(--gold),#c62828,transparent);
+}
+.login-brand{text-align:center;margin-bottom:26px}
+.login-crest{margin:0 auto 14px;display:block}
+.login-name{font-family:'Cinzel',serif;font-size:2rem;font-weight:700;letter-spacing:.12em;color:var(--gold);text-shadow:0 0 30px rgba(201,168,76,.3)}
+.login-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.8rem;letter-spacing:.2em;color:rgba(198,40,40,.55);margin-top:4px}
+.login-divider{width:60px;height:1px;background:linear-gradient(90deg,transparent,#c62828,transparent);margin:14px auto 0}
+.login-badge{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:rgba(198,40,40,.08);border:1px solid rgba(198,40,40,.2);
+  border-radius:4px;padding:8px 14px;margin-bottom:24px;
+}
+.login-badge span{font-size:.67rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(198,40,40,.75)}
+.login-fld{margin-bottom:15px}
+.login-fld label{display:block;font-size:.63rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:5px}
+.login-input{
+  width:100%;padding:11px 14px;background:var(--field);
+  border:1px solid var(--border2);border-radius:4px;
+  color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.88rem;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.login-input::placeholder{color:rgba(255,255,255,.15)}
+.login-input:focus{border-color:rgba(198,40,40,.5);box-shadow:0 0 0 3px rgba(198,40,40,.08)}
+.login-pass-wrap{position:relative}
+.login-pass-wrap .login-input{padding-right:38px}
+.login-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;color:rgba(255,255,255,.22);padding:0;transition:color .2s}
+.login-eye:hover{color:rgba(198,40,40,.6)}
+.login-err{font-size:.7rem;color:#e07070;margin-top:4px;font-family:'Cormorant Garamond',serif;font-style:italic;display:none}
+.login-err.show{display:block}
+.login-btn{
+  width:100%;padding:13px;margin-top:6px;
+  background:linear-gradient(135deg,#b71c1c 0%,#e53935 40%,#c62828 70%,#b71c1c 100%);
+  background-size:200% auto;
+  border:none;border-radius:4px;color:#fff;
+  font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;letter-spacing:.2em;
+  cursor:pointer;transition:background-position .5s,box-shadow .3s,transform .15s;
+  box-shadow:0 4px 24px rgba(198,40,40,.3);
+}
+.login-btn:hover{background-position:right center;box-shadow:0 6px 32px rgba(198,40,40,.5);transform:translateY(-1px)}
+.login-btn:active{transform:translateY(0)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.login-note{
+  display:flex;align-items:flex-start;gap:8px;
+  background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.1);
+  border-radius:4px;padding:10px 13px;margin-top:18px;
+}
+.login-note p{font-size:.67rem;color:rgba(255,255,255,.28);line-height:1.5;font-family:'Cormorant Garamond',serif;font-style:italic}
+.login-back{text-align:center;margin-top:16px;font-size:.75rem;color:var(--muted)}
+.login-back a{color:rgba(201,168,76,.65);text-decoration:none;transition:color .2s}
+.login-back a:hover{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN SCREEN ══════════ -->
+<div id="loginScreen">
+  <div class="login-orb login-orb1"></div>
+  <div class="login-orb login-orb2"></div>
+  <div class="login-card">
+    <!-- Brand -->
+    <div class="login-brand">
+      <svg class="login-crest" width="58" height="58" viewBox="0 0 72 72" fill="none">
+        <circle cx="36" cy="36" r="34" stroke="rgba(198,40,40,.3)" stroke-width="1"/>
+        <circle cx="36" cy="36" r="27" stroke="rgba(198,40,40,.18)" stroke-width="1"/>
+        <polygon points="36,6 43,27 66,27 49,42 56,64 36,51 16,64 23,42 6,27 29,27"
+          fill="rgba(198,40,40,.1)" stroke="#c62828" stroke-width="1.2" stroke-linejoin="round"/>
+        <text x="36" y="42" text-anchor="middle" font-family="Cinzel,serif" font-size="11" font-weight="700" fill="#c9a84c" letter-spacing="1">FL</text>
+      </svg>
+      <div class="login-name">FinLend</div>
+      <div class="login-sub">— Administration —</div>
+      <div class="login-divider"></div>
+    </div>
+
+    <!-- Badge -->
+    <div class="login-badge">
+      <svg width="13" height="13" fill="rgba(198,40,40,.8)" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      <span>Restricted — Authorised Personnel Only</span>
+    </div>
+
+    <!-- Fields -->
+    <div class="login-fld">
+      <label for="li-email">Admin Email</label>
+      <input class="login-input" type="email" id="li-email" placeholder="admin@finlend.com" autocomplete="email"/>
+      <div class="login-err" id="li-emailErr">Enter a valid email address.</div>
+    </div>
+    <div class="login-fld">
+      <label for="li-pass">Password</label>
+      <div class="login-pass-wrap">
+        <input class="login-input" type="password" id="li-pass" placeholder="••••••••" autocomplete="current-password"/>
+        <button class="login-eye" type="button" onclick="liToggleEye()">
+          <svg id="li-eyeIcon" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="login-err" id="li-passErr">Password must be at least 6 characters.</div>
+    </div>
+
+    <button class="login-btn" id="li-btn" onclick="doAdminLogin()">ACCESS ADMIN PANEL</button>
+
+    <div class="login-note">
+      <svg width="12" height="12" fill="rgba(201,168,76,.4)" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      <p>This portal is for authorised FinLend administrators only. Unauthorised access is prohibited.</p>
+    </div>
+    <p class="login-back">Not an admin? <a href="index.html">Go to Member Login →</a></p>
+  </div>
+</div>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<div class="sidebar" style="display:none">
+  <div class="sb-brand">
+    <div class="sb-logo">FinLend <span>Admin Panel</span></div>
+  </div>
+  <div class="sb-nav">
+    <div class="nav-group">Overview</div>
+    <button class="nav-item active" onclick="showSection('dashboard')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </button>
+    <div class="nav-group">Loan Management</div>
+    <button class="nav-item" onclick="showSection('applications')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
+      Loan Applications
+      <span class="nb" id="nb-apps" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="showSection('active')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+      Active Loans
+    </button>
+    <div class="nav-group">Users</div>
+    <button class="nav-item" onclick="showSection('users')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      All Users
+    </button>
+    <button class="nav-item" onclick="showSection('kyc')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      KYC Verification
+      <span class="nb" id="nb-kyc" style="display:none">0</span>
+    </button>
+    <div class="nav-group">Communication</div>
+    <button class="nav-item" onclick="showSection('chat')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      Chat with Users
+    </button>
+  </div>
+  <div class="sb-bottom">
+    <div class="admin-avatar">AD</div>
+    <div>
+      <div class="admin-name">Administrator</div>
+      <div class="admin-role">FinLend Admin</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main" style="display:none">
+  <div class="topbar">
+    <div class="topbar-title" id="topTitle">Admin Dashboard</div>
+    <div class="topbar-right">
+      <span style="font-size:.7rem;color:var(--muted);font-family:'Cormorant Garamond',serif;font-style:italic" id="adminClock"></span>
+      <button class="t-btn red" onclick="adminSignOut()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="section active" id="sec-dashboard">
+      <div class="stat-row">
+        <div class="stat-card"><div class="sc-lbl">Total Users</div><div class="sc-val" id="stat-users">—</div><div class="sc-sub">Registered members</div></div>
+        <div class="stat-card"><div class="sc-lbl">Pending Apps</div><div class="sc-val" id="stat-pending" style="color:var(--amber)">—</div><div class="sc-sub">Awaiting review</div></div>
+        <div class="stat-card"><div class="sc-lbl">Active Loans</div><div class="sc-val" id="stat-active" style="color:var(--green)">—</div><div class="sc-sub">Currently disbursed</div></div>
+        <div class="stat-card"><div class="sc-lbl">Total Disbursed</div><div class="sc-val" id="stat-disbursed">—</div><div class="sc-sub">All time</div></div>
+        <div class="stat-card"><div class="sc-lbl">KYC Pending</div><div class="sc-val" id="stat-kyc" style="color:var(--red)">—</div><div class="sc-sub">Needs review</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="ph"><div class="pt">Recent Loan Applications</div></div>
+          <table class="tbl" id="dash-recent-tbl">
+            <thead><tr><th>Loan ID</th><th>Borrower</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="dash-recent-body"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">KYC Queue</div></div>
+          <table class="tbl">
+            <thead><tr><th>Name</th><th>Member ID</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="dash-kyc-body"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LOAN APPLICATIONS ══ -->
+    <div class="section" id="sec-applications">
+      <div class="sec-head">
+        <div class="sec-title">Loan Applications <span>Guarantor-approved, awaiting admin review</span></div>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterApps('all',this)">All</button>
+        <button class="filter-btn" onclick="filterApps('pending',this)">Pending</button>
+        <button class="filter-btn" onclick="filterApps('approved',this)">Approved</button>
+        <button class="filter-btn" onclick="filterApps('rejected',this)">Rejected</button>
+      </div>
+      <div id="apps-container"></div>
+    </div>
+
+    <!-- ══ ACTIVE LOANS ══ -->
+    <div class="section" id="sec-active">
+      <div class="sec-head"><div class="sec-title">Active Loans <span>Disbursed & running</span></div></div>
+      <div class="panel">
+        <table class="tbl">
+          <thead><tr><th>Loan ID</th><th>Borrower</th><th>Amount</th><th>EMI</th><th>EMIs Paid</th><th>Remaining</th><th>Progress</th><th>Actions</th></tr></thead>
+          <tbody id="active-loans-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div class="section" id="sec-users">
+      <div class="sec-head"><div class="sec-title">All Users</div></div>
+      <div class="panel">
+        <div class="ph">
+          <div class="pt">Member Directory</div>
+          <input type="text" placeholder="Search by name, email, ID…" id="userSearch"
+            style="padding:7px 12px;background:var(--field);border:1px solid var(--border2);border-radius:4px;
+                   color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.82rem;outline:none;width:220px"
+            oninput="filterUsers(this.value)"/>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Member ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Credit Score</th><th>KYC</th><th>Joined</th><th>Action</th></tr></thead>
+          <tbody id="users-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ KYC ══ -->
+    <div class="section" id="sec-kyc">
+      <div class="sec-head"><div class="sec-title">KYC Verification <span>Review Aadhaar & PAN documents</span></div></div>
+      <div id="kyc-container"></div>
+    </div>
+
+    <!-- ══ CHAT ══ -->
+    <div class="section" id="sec-chat">
+      <div class="sec-head"><div class="sec-title">Chat with Users <span>Loan negotiation & support</span></div></div>
+      <div style="display:grid;grid-template-columns:260px 1fr;gap:16px;height:calc(100vh - 140px)">
+
+        <!-- Loan list -->
+        <div class="panel" style="overflow:hidden;display:flex;flex-direction:column;margin-bottom:0">
+          <div class="ph"><div class="pt">Loan Threads</div></div>
+          <div id="chatLoanList" style="flex:1;overflow-y:auto;padding:8px"></div>
+        </div>
+
+        <!-- Chat window -->
+        <div class="panel" style="overflow:hidden;display:flex;flex-direction:column;margin-bottom:0">
+          <div class="ph" id="chatPanelHead"><div class="pt">Select a loan to chat</div></div>
+          <div class="chat-wrap" style="height:100%;border:none;border-radius:0;background:transparent">
+            <div class="chat-messages" id="chatMessages">
+              <div class="empty" style="margin:auto"><div class="empty-icon">💬</div><div class="empty-text">Select a loan thread</div></div>
+            </div>
+            <div class="chat-input-row">
+              <input class="chat-input" type="text" id="chatInput" placeholder="Type as admin…" onkeydown="if(event.key==='Enter')sendAdminChat()"/>
+              <button class="btn btn-gold" onclick="sendAdminChat()">SEND</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══════════════ LOAN REVIEW MODAL ══════════════ -->
+<div class="modal-bg" id="loanModal">
+  <div class="modal">
+    <div class="modal-title" id="lm-title">Loan Application Review</div>
+    <div class="modal-sub" id="lm-sub">Review all details before approving or rejecting</div>
+
+    <!-- Borrower & Guarantor info -->
+    <div class="two-col" style="margin-bottom:16px">
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">BORROWER</div>
+        <div class="loan-detail-grid" id="lm-borrower"></div>
+      </div>
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">GUARANTOR</div>
+        <div class="loan-detail-grid" id="lm-guarantor"></div>
+      </div>
+    </div>
+
+    <!-- Loan terms -->
+    <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">LOAN TERMS</div>
+    <div class="loan-detail-grid" id="lm-terms" style="margin-bottom:16px"></div>
+
+    <!-- Salary proof -->
+    <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">SALARY PROOF</div>
+    <div id="lm-salary-wrap" style="margin-bottom:16px">
+      <div class="kyc-img-wrap" onclick="enlargeImg(this.querySelector('img')?.src)">
+        <div class="no-doc" id="lm-salary-placeholder">No document uploaded</div>
+        <img id="lm-salary-img" style="display:none" alt="Salary Proof"/>
+      </div>
+      <div style="margin-top:6px;display:flex;gap:8px">
+        <a id="lm-salary-dl" href="#" download="salary_proof" class="btn btn-blue btn-sm" style="text-decoration:none;display:none">⬇ Download</a>
+      </div>
+    </div>
+
+    <!-- Modify loan amount -->
+    <div style="background:rgba(201,168,76,.05);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:14px">
+      <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold-dim);letter-spacing:.1em;margin-bottom:10px">MODIFY LOAN AMOUNT (Optional)</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="number" id="lm-modify-amount" placeholder="Enter new amount if negotiated"
+          style="flex:1;padding:9px 12px;background:var(--field);border:1px solid var(--border2);border-radius:4px;
+                 color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.85rem;outline:none"/>
+        <button class="btn btn-ghost" onclick="recalcModal()">RECALCULATE</button>
+      </div>
+      <div id="lm-recalc" style="font-size:.75rem;color:var(--gold-dim);margin-top:6px;font-family:'Cormorant Garamond',serif;font-style:italic"></div>
+    </div>
+
+    <!-- Admin notes -->
+    <div class="fg" style="margin-bottom:14px">
+      <label>Admin Notes (sent to user)</label>
+      <textarea id="lm-notes" placeholder="Optional note to borrower about this decision…"></textarea>
+    </div>
+
+    <!-- PDF generation progress -->
+    <div class="pdf-progress" id="pdfProgress">
+      <div class="pdf-status" id="pdfStatus">Generating legal document…</div>
+      <div class="pdf-progress-bar"><div class="pdf-progress-fill" id="pdfFill"></div></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="closeLoanModal()">CLOSE</button>
+      <button class="btn btn-blue" onclick="openChatForLoan()">💬 CHAT</button>
+      <button class="btn btn-red" id="lm-btn-reject" onclick="adminDecision('rejected')">✗ REJECT</button>
+      <button class="btn btn-gold" id="lm-btn-approve" onclick="adminDecision('approved')" style="margin-left:auto">✓ APPROVE & DISBURSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ USER DETAIL MODAL ══════════════ -->
+<div class="modal-bg" id="userModal">
+  <div class="modal">
+    <div class="modal-title" id="um-title">User Details</div>
+    <div class="modal-sub" id="um-sub"></div>
+    <div class="two-col" style="margin-bottom:16px">
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">PROFILE</div>
+        <div id="um-profile"></div>
+      </div>
+      <div>
+        <!-- User photo -->
+        <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">PHOTO</div>
+        <div style="width:80px;height:80px;border-radius:50%;border:2px solid var(--border);overflow:hidden;background:var(--field);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold)" id="um-photo">?</div>
+      </div>
+    </div>
+    <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold);letter-spacing:.1em;margin-bottom:10px">KYC DOCUMENTS</div>
+    <div class="two-col" style="margin-bottom:16px">
+      <div>
+        <div style="font-size:.62rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Aadhaar Card</div>
+        <div class="kyc-img-wrap" onclick="enlargeImg(this.querySelector('img')?.src)" id="um-aadhaar-wrap">
+          <div class="no-doc">Not uploaded</div>
+        </div>
+        <div class="kyc-img-actions">
+          <a id="um-aadhaar-dl" href="#" download="aadhaar" class="btn btn-blue btn-sm" style="text-decoration:none;display:none">⬇ Download</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.62rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">PAN Card</div>
+        <div class="kyc-img-wrap" onclick="enlargeImg(this.querySelector('img')?.src)" id="um-pan-wrap">
+          <div class="no-doc">Not uploaded</div>
+        </div>
+        <div class="kyc-img-actions">
+          <a id="um-pan-dl" href="#" download="pan" class="btn btn-blue btn-sm" style="text-decoration:none;display:none">⬇ Download</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="closeUserModal()">CLOSE</button>
+      <button class="btn btn-gold" onclick="updateKYC('verified')" id="btn-kyc-verify">✓ VERIFY KYC</button>
+      <button class="btn btn-red"  onclick="updateKYC('rejected')" id="btn-kyc-reject">✗ REJECT KYC</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ IMAGE FULLSCREEN ══════════════ -->
+<div class="img-overlay" id="imgOverlay" onclick="closeImgOverlay()">
+  <button class="img-overlay-close" onclick="closeImgOverlay()">✕</button>
+  <img id="overlayImg" src="" alt="Document"/>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════ FIREBASE + LOGIC ══════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut as fbSignOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, collection, query, orderBy, getDocs, getDoc,
+  doc, updateDoc, addDoc, where, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const cfg = {
+  apiKey:"AIzaSyBMlCi_SXUytX64JzIxA_WpQGFIsAXQjtU",
+  authDomain:"finlend-b7737.firebaseapp.com",
+  projectId:"finlend-b7737",
+  storageBucket:"finlend-b7737.firebasestorage.app",
+  messagingSenderId:"600903478672",
+  appId:"1:600903478672:web:5714e65c3b10c0c998d715"
+};
+
+const app  = initializeApp(cfg);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// ── Globals ──
+let allLoans   = [];
+let allUsers   = [];
+let currentLoan = null;
+let currentUserData = null;
+let chatUnsub  = null;
+let currentChatLoanId = null;
+
+const CLOUD_NAME = 'dhcxxegrs';
+
+// ── Auth check (no strict guard — college project) ──
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.querySelector('.sidebar').style.display      = 'none';
+    document.querySelector('.main').style.display         = 'none';
+    return;
+  }
+  // Verify admin role
+  try {
+    const snap = await getDoc(doc(db,'users',user.uid));
+    if (!snap.exists() || snap.data().role !== 'admin') {
+      await fbSignOut(auth);
+      showLoginError('Access denied — not an admin account.');
+      return;
+    }
+  } catch(e) {
+    await fbSignOut(auth);
+    showLoginError('Verification failed. Try again.');
+    return;
+  }
+  // Show panel
+  document.getElementById('loginScreen').style.display = 'none';
+  document.querySelector('.sidebar').style.display      = 'flex';
+  document.querySelector('.main').style.display         = 'flex';
+  await loadAllData();
+  startClock();
+});
+
+// ══ DATA LOADING ══
+async function loadAllData() {
+  await Promise.all([loadLoans(), loadUsers()]);
+  renderDashboard();
+  renderApplications();
+  renderActiveLoans();
+  renderUsers();
+  renderKYC();
+  renderChatList();
+}
+
+async function loadLoans() {
+  const snap = await getDocs(query(collection(db,'loanApplications'), orderBy('createdAt','desc')));
+  allLoans = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  updateNavBadges();
+}
+
+async function loadUsers() {
+  const snap = await getDocs(query(collection(db,'users'), orderBy('createdAt','desc')));
+  allUsers = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+}
+
+function updateNavBadges() {
+  const pendingApps = allLoans.filter(l => l.adminStatus==='pending' && l.guarantorStatus==='approved').length;
+  const kycPending  = allUsers.filter(u => u.kycStatus==='submitted').length;
+  const nbA = document.getElementById('nb-apps');
+  const nbK = document.getElementById('nb-kyc');
+  nbA.textContent = pendingApps; nbA.style.display = pendingApps>0?'inline-block':'none';
+  nbK.textContent = kycPending;  nbK.style.display = kycPending>0?'inline-block':'none';
+}
+
+// ══ DASHBOARD ══
+function renderDashboard() {
+  document.getElementById('stat-users').textContent    = allUsers.length;
+  document.getElementById('stat-pending').textContent  = allLoans.filter(l=>l.adminStatus==='pending'&&l.guarantorStatus==='approved').length;
+  document.getElementById('stat-active').textContent   = allLoans.filter(l=>l.adminStatus==='approved').length;
+  document.getElementById('stat-disbursed').textContent= '₹'+fmt(allLoans.filter(l=>l.adminStatus==='approved').reduce((s,l)=>s+(l.loanAmount||0),0));
+  document.getElementById('stat-kyc').textContent      = allUsers.filter(u=>u.kycStatus==='submitted').length;
+
+  // Recent apps
+  const tbody = document.getElementById('dash-recent-body');
+  const recent = allLoans.filter(l=>l.guarantorStatus==='approved').slice(0,6);
+  tbody.innerHTML = recent.length===0
+    ? '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">No applications</td></tr>'
+    : recent.map(l=>`<tr>
+        <td class="mono">${l.loanId||l.id.slice(0,8).toUpperCase()}</td>
+        <td>${l.borrowerName||'—'}</td>
+        <td class="mono">₹${fmt(l.loanAmount)}</td>
+        <td>${statusBadge(l.adminStatus)}</td>
+        <td><button class="btn btn-gold btn-sm" onclick="openLoanModal('${l.id}')">REVIEW</button></td>
+      </tr>`).join('');
+
+  // KYC queue
+  const kbody = document.getElementById('dash-kyc-body');
+  const kqueue = allUsers.filter(u=>u.kycStatus==='submitted').slice(0,6);
+  kbody.innerHTML = kqueue.length===0
+    ? '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">No KYC pending</td></tr>'
+    : kqueue.map(u=>`<tr>
+        <td>${u.name||'—'}</td>
+        <td class="mono" style="color:var(--gold)">${u.uniqueUserNumber||'—'}</td>
+        <td><span class="badge amber">Submitted</span></td>
+        <td><button class="btn btn-gold btn-sm" onclick="openUserModal('${u.id}')">REVIEW KYC</button></td>
+      </tr>`).join('');
+}
+
+// ══ LOAN APPLICATIONS ══
+let appFilter = 'all';
+window.filterApps = function(f, btn) {
+  appFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderApplications();
+};
+
+function renderApplications() {
+  const el = document.getElementById('apps-container');
+  let loans = allLoans.filter(l => l.guarantorStatus==='approved' || l.adminStatus==='approved' || l.adminStatus==='rejected');
+  if (appFilter !== 'all') loans = loans.filter(l => l.adminStatus===appFilter);
+  if (loans.length===0) { el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No applications found</div></div>'; return; }
+
+  el.innerHTML = loans.map(l => {
+    const borrower = allUsers.find(u=>u.id===l.borrowerId)||{};
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px 18px;margin-bottom:12px;position:relative;overflow:hidden">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${l.adminStatus==='approved'?'var(--green)':l.adminStatus==='rejected'?'var(--red)':'var(--amber)'}"></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:.85rem;color:var(--gold);letter-spacing:.06em">${l.loanId||l.id.slice(0,8).toUpperCase()}</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:2px">${l.borrowerName||'—'} · ${l.borrowerUniqueNumber||'—'}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${statusBadge(l.adminStatus==='pending'?'pending admin':l.adminStatus)}
+          ${l.adminStatus==='pending'?`<button class="btn btn-gold btn-sm" onclick="openLoanModal('${l.id}')">REVIEW</button>`:''}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+        ${[['Amount','₹'+fmt(l.loanAmount)],['EMI','₹'+fmt(l.emi||0)],['Tenure',l.tenure+' mo'],['Rate',l.interestRate+'%'],['Purpose',l.purpose||'—']]
+          .map(([ll,v])=>`<div><div style="font-size:.58rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em">${ll}</div><div style="font-family:'Cinzel',serif;font-size:.8rem;color:var(--ivory)">${v}</div></div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══ ACTIVE LOANS ══
+function renderActiveLoans() {
+  const tbody = document.getElementById('active-loans-body');
+  const active = allLoans.filter(l=>l.adminStatus==='approved');
+  if (active.length===0) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No active loans</td></tr>'; return; }
+  tbody.innerHTML = active.map(l => {
+    const paid = l.totalPaid||0;
+    const total = l.totalPayable||l.loanAmount||1;
+    const pct = Math.min(100,Math.round(paid/total*100));
+    return `<tr>
+      <td class="mono">${l.loanId||l.id.slice(0,8).toUpperCase()}</td>
+      <td>${l.borrowerName||'—'}</td>
+      <td class="mono">₹${fmt(l.loanAmount)}</td>
+      <td class="mono">₹${fmt(l.emi||0)}</td>
+      <td>${l.emisPaid||0}/${l.tenure}</td>
+      <td class="mono" style="color:var(--amber)">₹${fmt(Math.max(0,(l.remainingAmount||l.loanAmount)-(l.totalPaid||0)))}</td>
+      <td style="min-width:100px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div style="font-size:.62rem;color:var(--muted);margin-top:2px">${pct}%</div></td>
+      <td><button class="btn btn-blue btn-sm" onclick="openLoanModal('${l.id}')">VIEW</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══ USERS ══
+let userFilter = '';
+window.filterUsers = function(v) { userFilter = v.toLowerCase(); renderUsers(); };
+
+function renderUsers() {
+  const tbody = document.getElementById('users-body');
+  let users = allUsers;
+  if (userFilter) users = users.filter(u=>
+    (u.name||'').toLowerCase().includes(userFilter)||
+    (u.email||'').toLowerCase().includes(userFilter)||
+    (u.uniqueUserNumber||'').toLowerCase().includes(userFilter)
+  );
+  if (users.length===0) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No users found</td></tr>'; return; }
+  tbody.innerHTML = users.map(u=>`<tr>
+    <td class="mono" style="color:var(--gold)">${u.uniqueUserNumber||'—'}</td>
+    <td>${u.name||'—'}</td>
+    <td style="font-size:.75rem">${u.email||'—'}</td>
+    <td>${u.phone||'—'}</td>
+    <td style="font-family:'Cinzel',serif;color:${(u.creditScore||650)>=700?'var(--green)':'var(--amber)'}">${u.creditScore||650}</td>
+    <td>${kycBadge(u.kycStatus)}</td>
+    <td style="font-size:.72rem;color:var(--muted)">${u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'—'}</td>
+    <td><button class="btn btn-gold btn-sm" onclick="openUserModal('${u.id}')">VIEW</button></td>
+  </tr>`).join('');
+}
+
+// ══ KYC ══
+function renderKYC() {
+  const el = document.getElementById('kyc-container');
+  const pending = allUsers.filter(u=>u.kycStatus==='submitted');
+  if (pending.length===0) { el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">All KYC requests reviewed</div></div>'; return; }
+  el.innerHTML = pending.map(u=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px 18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:.88rem;color:var(--ivory)">${u.name||'—'}</div>
+          <div style="font-size:.7rem;color:var(--gold);margin-top:2px">${u.uniqueUserNumber||'—'} · ${u.email||'—'}</div>
+        </div>
+        <span class="badge amber">KYC Submitted</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div>
+          <div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Aadhaar Card</div>
+          <div class="kyc-img-wrap" onclick="enlargeImg('${u.aadhaarUrl||''}')">
+            ${u.aadhaarUrl?`<img src="${u.aadhaarUrl}" alt="Aadhaar"/>`:'<div class="no-doc">Not uploaded</div>'}
+          </div>
+          ${u.aadhaarUrl?`<a href="${u.aadhaarUrl}" download="aadhaar_${u.uniqueUserNumber}" target="_blank" class="btn btn-blue btn-sm" style="text-decoration:none;display:inline-block;margin-top:6px">⬇ Download Aadhaar</a>`:''}
+        </div>
+        <div>
+          <div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">PAN Card</div>
+          <div class="kyc-img-wrap" onclick="enlargeImg('${u.panUrl||''}')">
+            ${u.panUrl?`<img src="${u.panUrl}" alt="PAN"/>`:'<div class="no-doc">Not uploaded</div>'}
+          </div>
+          ${u.panUrl?`<a href="${u.panUrl}" download="pan_${u.uniqueUserNumber}" target="_blank" class="btn btn-blue btn-sm" style="text-decoration:none;display:inline-block;margin-top:6px">⬇ Download PAN</a>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-green" onclick="quickKYC('${u.id}','verified')">✓ VERIFY KYC</button>
+        <button class="btn btn-red"   onclick="quickKYC('${u.id}','rejected')">✗ REJECT KYC</button>
+        <button class="btn btn-ghost" onclick="openUserModal('${u.id}')">Full Profile</button>
+      </div>
+    </div>`).join('');
+}
+
+window.quickKYC = async function(userId, status) {
+  try {
+    await updateDoc(doc(db,'users',userId),{ kycStatus: status });
+    const idx = allUsers.findIndex(u=>u.id===userId);
+    if (idx>-1) allUsers[idx].kycStatus = status;
+    showToast(status==='verified'?'✓ KYC Verified!':'KYC Rejected', status==='verified'?'ok':'err');
+    renderKYC(); renderUsers(); renderDashboard(); updateNavBadges();
+  } catch(e) { showToast('Error: '+e.message,'err'); }
+};
+
+// ══ LOAN MODAL ══
+window.openLoanModal = async function(loanId) {
+  const loan = allLoans.find(l=>l.id===loanId);
+  if (!loan) return;
+  currentLoan = loan;
+
+  document.getElementById('lm-title').textContent = 'Loan — '+( loan.loanId||loanId.slice(0,8).toUpperCase());
+  document.getElementById('lm-sub').textContent   = 'Borrower: '+loan.borrowerName+' · Applied: '+(loan.createdAt?new Date(loan.createdAt).toLocaleDateString('en-IN'):'—');
+
+  // Borrower details
+  const borrower = allUsers.find(u=>u.id===loan.borrowerId)||{};
+  document.getElementById('lm-borrower').innerHTML = detailItems([
+    ['Name', loan.borrowerName||'—'],
+    ['Member ID', loan.borrowerUniqueNumber||'—'],
+    ['Credit Score', loan.borrowerCreditScore||borrower.creditScore||'—'],
+    ['Phone', borrower.phone||'—'],
+    ['Email', borrower.email||'—'],
+    ['Address', borrower.address||'—'],
+  ]);
+
+  // Guarantor
+  document.getElementById('lm-guarantor').innerHTML = detailItems([
+    ['Name', loan.guarantorName||'—'],
+    ['Member ID', loan.guarantorUniqueNumber||'—'],
+    ['Status', loan.guarantorStatus==='approved'?'✓ Approved':'Pending'],
+  ]);
+
+  // Terms
+  document.getElementById('lm-terms').innerHTML = detailItems([
+    ['Amount', '₹'+fmt(loan.loanAmount)],
+    ['Tenure', loan.tenure+' months'],
+    ['Rate', loan.interestRate+'%'],
+    ['Monthly EMI', '₹'+fmt(loan.emi||0)],
+    ['Total Payable', '₹'+fmt(loan.totalPayable||0)],
+    ['Total Interest', '₹'+fmt(loan.totalInterest||0)],
+    ['Purpose', loan.purpose||'—'],
+    ['Employment', loan.employmentType||'—'],
+    ['Monthly Income', '₹'+fmt(loan.monthlyIncome||0)],
+  ]);
+
+  // Salary proof
+  const salaryImg = document.getElementById('lm-salary-img');
+  const salaryPh  = document.getElementById('lm-salary-placeholder');
+  const salaryDl  = document.getElementById('lm-salary-dl');
+  if (loan.salaryProofUrl) {
+    salaryImg.src = loan.salaryProofUrl;
+    salaryImg.style.display = 'block';
+    salaryPh.style.display  = 'none';
+    salaryDl.href = loan.salaryProofUrl;
+    salaryDl.setAttribute('target','_blank');
+    salaryDl.style.display = 'inline-block';
+  } else {
+    salaryImg.style.display = 'none';
+    salaryPh.style.display  = 'block';
+    salaryDl.style.display  = 'none';
+  }
+
+  // Status-based buttons
+  const approved = loan.adminStatus==='approved';
+  const rejected = loan.adminStatus==='rejected';
+  document.getElementById('lm-btn-approve').disabled = approved||rejected;
+  document.getElementById('lm-btn-reject').disabled  = approved||rejected;
+  document.getElementById('lm-modify-amount').value  = '';
+  document.getElementById('lm-recalc').textContent   = '';
+  document.getElementById('lm-notes').value          = '';
+  document.getElementById('pdfProgress').style.display='none';
+
+  document.getElementById('loanModal').classList.add('open');
+};
+
+window.closeLoanModal = function() { document.getElementById('loanModal').classList.remove('open'); };
+
+window.recalcModal = function() {
+  if (!currentLoan) return;
+  const newAmt = parseFloat(document.getElementById('lm-modify-amount').value)||0;
+  if (!newAmt) { document.getElementById('lm-recalc').textContent='Enter an amount to recalculate'; return; }
+  const n = currentLoan.tenure||12;
+  const r = (currentLoan.interestRate||12)/12/100;
+  const emi = newAmt*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+  const total = emi*n;
+  document.getElementById('lm-recalc').textContent =
+    `New EMI: ₹${fmt(emi)} · Total Payable: ₹${fmt(total)} · Interest: ₹${fmt(total-newAmt)}`;
+};
+
+window.openChatForLoan = function() {
+  closeLoanModal();
+  showSection('chat');
+  setTimeout(()=>selectChatLoan(currentLoan?.id),200);
+};
+
+// ══ ADMIN DECISION ══
+window.adminDecision = async function(decision) {
+  if (!currentLoan) return;
+  const btn = decision==='approved'?document.getElementById('lm-btn-approve'):document.getElementById('lm-btn-reject');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>'+(decision==='approved'?'PROCESSING…':'REJECTING…');
+
+  try {
+    const modAmt   = parseFloat(document.getElementById('lm-modify-amount').value)||0;
+    const notes    = document.getElementById('lm-notes').value.trim();
+    const loanId   = currentLoan.id;
+    const loan     = currentLoan;
+
+    // Possibly modified amount
+    const finalAmt = modAmt>0 ? modAmt : loan.loanAmount;
+    const n        = loan.tenure||12;
+    const r        = (loan.interestRate||12)/12/100;
+    const finalEmi = finalAmt*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+    const finalTotal = finalEmi*n;
+    const now      = new Date();
+    const nextDue  = new Date(now); nextDue.setMonth(nextDue.getMonth()+1);
+
+    // Build update payload
+    const updatePayload = {
+      adminStatus:    decision,
+      adminNotes:     notes,
+      adminDecidedAt: now.toISOString(),
+    };
+    if (decision==='approved') {
+      Object.assign(updatePayload, {
+        loanAmount:    finalAmt,
+        emi:           Math.round(finalEmi*100)/100,
+        totalPayable:  Math.round(finalTotal*100)/100,
+        totalInterest: Math.round((finalTotal-finalAmt)*100)/100,
+        remainingAmount: finalAmt,
+        nextDue:       nextDue.toLocaleDateString('en-IN'),
+        status:        'active',
+        emisPaid:      0,
+        totalPaid:     0,
+        emiHistory:    [],
+      });
+    }
+
+    await updateDoc(doc(db,'loanApplications',loanId), updatePayload);
+
+    // System chat message
+    await addDoc(collection(db,'chatMessages'),{
+      loanId, senderId:'admin', senderName:'FinLend Admin',
+      message: decision==='approved'
+        ? `✓ Loan of ₹${fmt(finalAmt)} approved by Admin. EMI: ₹${fmt(finalEmi)}/month. Disbursement processed.${notes?' Note: '+notes:''}`
+        : `✗ Loan application rejected by Admin.${notes?' Reason: '+notes:''}`,
+      timestamp: now.toISOString(),
+    });
+
+    if (decision==='approved') {
+      // Generate legal PDF and send notification
+      await generateAndSendLegalPDF(loanId, loan, finalAmt, finalEmi, finalTotal, notes);
+    } else {
+      // Send rejection notification
+      await addDoc(collection(db,'notifications'),{
+        userId:  loan.borrowerId,
+        type:    'loan_rejected',
+        loanId,
+        loanDocId: loanId,
+        message: `Your loan application ${loan.loanId} has been rejected.${notes?' Reason: '+notes:''}`,
+        read:    false,
+        createdAt: now.toISOString(),
+      });
+    }
+
+    // Update local state
+    const idx = allLoans.findIndex(l=>l.id===loanId);
+    if (idx>-1) Object.assign(allLoans[idx], updatePayload);
+
+    closeLoanModal();
+    showToast(decision==='approved'?'✓ Loan approved & legal document sent!':'Loan rejected.', decision==='approved'?'ok':'err');
+    renderDashboard(); renderApplications(); renderActiveLoans(); updateNavBadges();
+  } catch(e) {
+    btn.disabled=false;
+    btn.innerHTML = decision==='approved'?'✓ APPROVE & DISBURSE':'✗ REJECT';
+    console.error(e); showToast('Error: '+e.message,'err');
+  }
+};
+
+// ══ LEGAL PDF GENERATION ══
+async function generateAndSendLegalPDF(loanId, loan, finalAmt, finalEmi, finalTotal, notes) {
+  const prog  = document.getElementById('pdfProgress');
+  const fill  = document.getElementById('pdfFill');
+  const status= document.getElementById('pdfStatus');
+  prog.style.display='block';
+
+  const setProg = (pct, txt) => { fill.style.width=pct+'%'; status.textContent=txt; };
+
+  setProg(10,'Fetching borrower details…');
+  const borrower = allUsers.find(u=>u.id===loan.borrowerId)||{};
+  await sleep(200);
+
+  setProg(25,'Loading borrower photo…');
+  let photoDataUrl = null;
+  if (borrower.photoUrl) {
+    try { photoDataUrl = await urlToDataUrl(borrower.photoUrl); } catch {}
+  }
+  await sleep(150);
+
+  setProg(45,'Generating legal document…');
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const W=210, H=297;
+
+  // ── Background & borders ──
+  pdf.setFillColor(7,9,26);
+  pdf.rect(0,0,W,H,'F');
+
+  // Gold outer border
+  pdf.setDrawColor(201,168,76); pdf.setLineWidth(1.2);
+  pdf.rect(8,8,W-16,H-16,'S');
+  // Inner border
+  pdf.setLineWidth(0.4); pdf.setDrawColor(201,168,76);
+  pdf.rect(11,11,W-22,H-22,'S');
+
+  // Top gold band
+  pdf.setFillColor(26,35,126);
+  pdf.rect(8,8,W-16,22,'F');
+
+  // ── Header ──
+  pdf.setTextColor(201,168,76);
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(18);
+  pdf.text('FINLEND',W/2,20,{align:'center'});
+  pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+  pdf.setTextColor(201,168,76,0.6);
+  pdf.text('TRUSTED FINANCIAL SERVICES  ·  LOAN AGREEMENT DOCUMENT',W/2,26,{align:'center'});
+
+  // Gold divider
+  pdf.setDrawColor(201,168,76); pdf.setLineWidth(0.5);
+  pdf.line(20,32,W-20,32);
+
+  // Document title
+  pdf.setTextColor(245,240,232);
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(13);
+  pdf.text('LOAN SANCTION & DISBURSEMENT LETTER',W/2,40,{align:'center'});
+
+  // Loan ID and date
+  pdf.setFontSize(8); pdf.setFont('helvetica','normal'); pdf.setTextColor(201,168,76);
+  pdf.text(`Loan ID: ${loan.loanId||loanId.slice(0,10).toUpperCase()}`,20,48);
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})}`,W-20,48,{align:'right'});
+
+  pdf.setDrawColor(201,168,76); pdf.setLineWidth(0.3);
+  pdf.line(20,51,W-20,51);
+
+  // ── Borrower photo box ──
+  let yStart = 56;
+  if (photoDataUrl) {
+    try {
+      pdf.addImage(photoDataUrl,'JPEG',W-50,yStart,28,32);
+      pdf.setDrawColor(201,168,76); pdf.setLineWidth(0.4);
+      pdf.rect(W-50,yStart,28,32,'S');
+    } catch {}
+  } else {
+    pdf.setFillColor(17,22,39);
+    pdf.rect(W-50,yStart,28,32,'F');
+    pdf.setDrawColor(201,168,76); pdf.setLineWidth(0.4);
+    pdf.rect(W-50,yStart,28,32,'S');
+    pdf.setTextColor(201,168,76); pdf.setFontSize(6);
+    pdf.text('PHOTO',W-36,yStart+17,{align:'center'});
+  }
+
+  // ── Section: Borrower Details ──
+  sectionTitle(pdf,20,yStart,'BORROWER INFORMATION');
+  yStart += 6;
+  const bFields = [
+    ['Full Name',          borrower.name||loan.borrowerName||'—'],
+    ['Member ID',          loan.borrowerUniqueNumber||'—'],
+    ['Email Address',      borrower.email||'—'],
+    ['Phone Number',       borrower.phone||'—'],
+    ['Date of Birth',      borrower.dateOfBirth||'—'],
+    ['Residential Address',borrower.address||'—'],
+    ['Credit Score',       String(loan.borrowerCreditScore||borrower.creditScore||650)],
+    ['KYC Status',         (borrower.kycStatus||'').toUpperCase()],
+  ];
+  yStart = drawFields(pdf,20,yStart,bFields,W-80);
+  yStart += 6;
+
+  pdf.setDrawColor(201,168,76); pdf.setLineWidth(0.3);
+  pdf.line(20,yStart,W-20,yStart);
+  yStart += 6;
+
+  // ── Section: Loan Details ──
+  setProg(65,'Adding loan terms…');
+  sectionTitle(pdf,20,yStart,'LOAN DETAILS');
+  yStart += 6;
+  const lFields = [
+    ['Loan Amount',          '₹ '+fmt(finalAmt)],
+    ['Interest Rate',        loan.interestRate+'% per annum'],
+    ['Loan Tenure',          loan.tenure+' Months'],
+    ['Monthly EMI',          '₹ '+fmt(finalEmi)],
+    ['Total Amount Payable', '₹ '+fmt(finalTotal)],
+    ['Total Interest',       '₹ '+fmt(finalTotal-finalAmt)],
+    ['Loan Purpose',         loan.purpose||'—'],
+    ['Employment Type',      loan.employmentType||'—'],
+    ['Monthly Income',       '₹ '+fmt(loan.monthlyIncome||0)],
+    ['First EMI Due',        new Date(Date.now()+30*24*3600*1000).toLocaleDateString('en-IN')],
+    ['Approval Date',        new Date().toLocaleDateString('en-IN')],
+  ];
+  yStart = drawFields(pdf,20,yStart,lFields,W-40);
+  yStart += 6;
+
+  pdf.line(20,yStart,W-20,yStart);
+  yStart += 6;
+
+  // ── Guarantor ──
+  sectionTitle(pdf,20,yStart,'GUARANTOR INFORMATION');
+  yStart += 6;
+  const gFields = [
+    ['Guarantor Name',      loan.guarantorName||'—'],
+    ['Guarantor Member ID', loan.guarantorUniqueNumber||'—'],
+    ['Approval Status',     'APPROVED'],
+  ];
+  yStart = drawFields(pdf,20,yStart,gFields,W-40);
+  yStart += 6;
+
+  pdf.line(20,yStart,W-20,yStart);
+  yStart += 8;
+
+  // ── Terms ──
+  setProg(78,'Adding terms & conditions…');
+  pdf.setTextColor(201,168,76); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+  pdf.text('TERMS & CONDITIONS',20,yStart);
+  yStart += 5;
+  pdf.setTextColor(180,180,200); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+  const terms = [
+    '1. The borrower agrees to repay the above loan amount in monthly EMI installments as stated.',
+    '2. Late payment will incur a penalty and reduce the borrower\'s credit score by 10 points.',
+    '3. Default of EMI will reduce credit score by 80 points and legal action may be initiated.',
+    '4. The guarantor is equally liable for repayment in case the borrower defaults.',
+    '5. This document serves as a legally binding agreement between FinLend and the borrower.',
+    '6. Early repayment is allowed and credited as extra payment toward principal amount.',
+  ];
+  terms.forEach(t => { pdf.text(t,20,yStart,{maxWidth:W-40}); yStart+=6; });
+  yStart += 4;
+
+  // ── STAMP ──
+  setProg(88,'Adding official stamp…');
+  const stampX = W-60, stampY = yStart-10;
+  // Circle stamp
+  pdf.setDrawColor(201,168,76); pdf.setLineWidth(1.2);
+  pdf.circle(stampX,stampY,18,'S');
+  pdf.setLineWidth(0.5);
+  pdf.circle(stampX,stampY,15,'S');
+  pdf.setFillColor(26,35,126); pdf.setDrawColor(26,35,126);
+  pdf.circle(stampX,stampY,14.5,'F');
+  pdf.setTextColor(201,168,76); pdf.setFont('helvetica','bold'); pdf.setFontSize(6.5);
+  pdf.text('FINLEND',stampX,stampY-4,{align:'center'});
+  pdf.setFontSize(5); pdf.setFont('helvetica','normal');
+  pdf.text('OFFICIAL SEAL',stampX,stampY,{align:'center'});
+  pdf.text('APPROVED',stampX,stampY+4,{align:'center'});
+  pdf.setFontSize(4.5);
+  pdf.text(new Date().getFullYear().toString(),stampX,stampY+7.5,{align:'center'});
+
+  // Signature line
+  pdf.setDrawColor(201,168,76); pdf.setLineWidth(0.4);
+  pdf.line(20,yStart+10,80,yStart+10);
+  pdf.setTextColor(201,168,76); pdf.setFontSize(6.5); pdf.setFont('helvetica','bold');
+  pdf.text('Authorised Signatory — FinLend',20,yStart+15);
+  pdf.setFont('helvetica','normal'); pdf.setTextColor(180,180,200); pdf.setFontSize(6);
+  pdf.text('Digital document — valid without physical signature',20,yStart+20);
+
+  // Bottom bar
+  pdf.setFillColor(26,35,126);
+  pdf.rect(8,H-16,W-16,8,'F');
+  pdf.setTextColor(201,168,76); pdf.setFontSize(5.5); pdf.setFont('helvetica','normal');
+  pdf.text(`FinLend · Loan ID: ${loan.loanId||loanId} · Member: ${loan.borrowerUniqueNumber||'—'} · Generated: ${new Date().toLocaleString('en-IN')}`,W/2,H-11,{align:'center'});
+
+  // ── Output as base64 ──
+  setProg(92,'Uploading document to secure storage…');
+  const pdfBlob   = pdf.output('blob');
+  const pdfBase64 = pdf.output('datauristring');
+
+  // Upload to Cloudinary as raw file (PDF)
+  let pdfUrl = null;
+  try {
+    pdfUrl = await uploadPdfToCloudinary(pdfBlob, `loan_agreement_${loan.loanId||loanId}`);
+  } catch(e) {
+    console.error('Cloudinary PDF upload failed, using base64:', e);
+    // Fallback: store as base64 data URI — user can still download
+    pdfUrl = 'DATAURI:'+pdfBase64;
+  }
+
+  setProg(97,'Sending notification to borrower…');
+
+  // Send notification to borrower with PDF link
+  await addDoc(collection(db,'notifications'),{
+    userId:    loan.borrowerId,
+    type:      'loan_approved',
+    loanId:    loanId,
+    loanDocId: loanId,
+    loanRef:   loan.loanId||loanId,
+    message:   `🎉 Your loan of ₹${fmt(finalAmt)} has been approved and disbursed! Your legal agreement is ready.`,
+    pdfUrl:    pdfUrl,
+    pdfBase64: pdfBase64,  // always store base64 as fallback
+    read:      false,
+    createdAt: new Date().toISOString(),
+  });
+
+  // Also trigger download for admin
+  pdf.save(`FinLend_Loan_Agreement_${loan.loanId||loanId}.pdf`);
+
+  setProg(100,'✓ Document generated & sent!');
+  await sleep(800);
+  prog.style.display='none';
+}
+
+// PDF helper — draw section title
+function sectionTitle(pdf, x, y, text) {
+  pdf.setFillColor(26,35,126);
+  pdf.rect(x-2,y-4,170,7,'F');
+  pdf.setTextColor(201,168,76); pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5);
+  pdf.text(text, x, y);
+  pdf.setTextColor(245,240,232);
+}
+
+// PDF helper — draw key-value pairs
+function drawFields(pdf, x, y, fields, maxW) {
+  const colW = (maxW)/2;
+  let col=0, startX=x;
+  fields.forEach(([label,val])=>{
+    const cx = startX + col*colW;
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(6); pdf.setTextColor(201,168,76);
+    pdf.text(label+':', cx, y);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(7); pdf.setTextColor(245,240,232);
+    pdf.text(String(val), cx+32, y);
+    col++;
+    if (col>=2){ col=0; y+=7; }
+  });
+  if (col>0) y+=7;
+  return y;
+}
+
+// Convert image URL to dataURL (handles CORS via canvas)
+function urlToDataUrl(url) {
+  return new Promise((resolve,reject) => {
+    const img = new Image(); img.crossOrigin='anonymous';
+    img.onload  = () => { const c=document.createElement('canvas'); c.width=img.width; c.height=img.height; c.getContext('2d').drawImage(img,0,0); resolve(c.toDataURL('image/jpeg',0.8)); };
+    img.onerror = () => reject(new Error('Image load failed'));
+    img.src = url + (url.includes('?')?'&':'?')+'_t='+Date.now();
+    setTimeout(()=>reject(new Error('timeout')),8000);
+  });
+}
+
+// Upload PDF blob to Cloudinary (raw upload)
+function uploadPdfToCloudinary(blob, filename) {
+  return new Promise((resolve,reject)=>{
+    const fd = new FormData();
+    fd.append('file', blob, filename+'.pdf');
+    fd.append('upload_preset','finlend_unsigned');
+    fd.append('resource_type','raw');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST','https://api.cloudinary.com/v1_1/dhcxxegrs/raw/upload');
+    xhr.onload = ()=>{
+      try {
+        const d=JSON.parse(xhr.responseText);
+        if(d.secure_url) resolve(d.secure_url);
+        else reject(new Error(d.error?.message||'Upload failed'));
+      } catch { reject(new Error('Parse error')); }
+    };
+    xhr.onerror=()=>reject(new Error('Network error'));
+    xhr.send(fd);
+  });
+}
+
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+// ══ USER MODAL ══
+window.openUserModal = async function(userId) {
+  const user = allUsers.find(u=>u.id===userId);
+  if (!user) return;
+  currentUserData = user;
+
+  document.getElementById('um-title').textContent = user.name||'User';
+  document.getElementById('um-sub').textContent   = (user.uniqueUserNumber||'—')+' · '+( user.email||'—');
+
+  // Profile
+  document.getElementById('um-profile').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr;gap:6px">
+      ${[['Phone',user.phone||'—'],['Address',user.address||'—'],['DOB',user.dateOfBirth||'—'],
+         ['Credit Score',user.creditScore||650],['KYC',user.kycStatus||'pending'],
+         ['Joined',user.createdAt?new Date(user.createdAt).toLocaleDateString('en-IN'):'—']]
+        .map(([l,v])=>`<div style="display:flex;gap:8px"><span style="font-size:.62rem;color:var(--gold-dim);min-width:80px;text-transform:uppercase;letter-spacing:.1em">${l}</span><span style="font-size:.82rem;color:var(--ivory)">${v}</span></div>`).join('')}
+    </div>`;
+
+  // Photo
+  const photoEl = document.getElementById('um-photo');
+  if (user.photoUrl) {
+    photoEl.innerHTML = `<img src="${user.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+  } else {
+    photoEl.textContent = (user.name||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  }
+
+  // Aadhaar
+  const aadhaarWrap = document.getElementById('um-aadhaar-wrap');
+  const aadhaarDl   = document.getElementById('um-aadhaar-dl');
+  if (user.aadhaarUrl) {
+    aadhaarWrap.innerHTML = `<img src="${user.aadhaarUrl}" alt="Aadhaar" onclick="enlargeImg('${user.aadhaarUrl}')"/>`;
+    aadhaarDl.href = user.aadhaarUrl; aadhaarDl.setAttribute('target','_blank'); aadhaarDl.style.display='inline-block';
+  } else {
+    aadhaarWrap.innerHTML = '<div class="no-doc">Not uploaded</div>';
+    aadhaarDl.style.display='none';
+  }
+
+  // PAN
+  const panWrap = document.getElementById('um-pan-wrap');
+  const panDl   = document.getElementById('um-pan-dl');
+  if (user.panUrl) {
+    panWrap.innerHTML = `<img src="${user.panUrl}" alt="PAN" onclick="enlargeImg('${user.panUrl}')"/>`;
+    panDl.href = user.panUrl; panDl.setAttribute('target','_blank'); panDl.style.display='inline-block';
+  } else {
+    panWrap.innerHTML = '<div class="no-doc">Not uploaded</div>';
+    panDl.style.display='none';
+  }
+
+  const isVerified = user.kycStatus==='verified';
+  document.getElementById('btn-kyc-verify').disabled = isVerified;
+  document.getElementById('btn-kyc-reject').disabled = user.kycStatus==='rejected';
+
+  document.getElementById('userModal').classList.add('open');
+};
+
+window.closeUserModal = function() { document.getElementById('userModal').classList.remove('open'); };
+
+window.updateKYC = async function(status) {
+  if (!currentUserData) return;
+  try {
+    await updateDoc(doc(db,'users',currentUserData.id),{ kycStatus:status });
+    const idx=allUsers.findIndex(u=>u.id===currentUserData.id);
+    if(idx>-1) allUsers[idx].kycStatus=status;
+    // Notify user
+    await addDoc(collection(db,'notifications'),{
+      userId:  currentUserData.id,
+      type:    'kyc_update',
+      message: status==='verified'?'✓ Your KYC has been verified by FinLend Admin!':'Your KYC was rejected. Please re-upload clear documents.',
+      read:    false, createdAt: new Date().toISOString(),
+    });
+    showToast(status==='verified'?'✓ KYC Verified!':'KYC Rejected', status==='verified'?'ok':'err');
+    closeUserModal(); renderKYC(); renderUsers(); renderDashboard(); updateNavBadges();
+  } catch(e) { showToast('Error: '+e.message,'err'); }
+};
+
+// ══ CHAT ══
+function renderChatList() {
+  const el = document.getElementById('chatLoanList');
+  if (allLoans.length===0) { el.innerHTML='<div style="padding:12px;font-size:.78rem;color:var(--muted)">No loans yet</div>'; return; }
+  el.innerHTML = allLoans.map(l=>`
+    <div onclick="selectChatLoan('${l.id}')" id="cll-${l.id}"
+      style="padding:10px 12px;border-radius:5px;cursor:pointer;margin-bottom:4px;transition:background .2s;border:1px solid transparent"
+      onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background=''">
+      <div style="font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold)">${l.loanId||l.id.slice(0,8).toUpperCase()}</div>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:2px">${l.borrowerName||'—'}</div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:1px">₹${fmt(l.loanAmount||0)}</div>
+    </div>`).join('');
+}
+
+window.selectChatLoan = function(loanId) {
+  currentChatLoanId = loanId;
+  const loan = allLoans.find(l=>l.id===loanId);
+  document.getElementById('chatPanelHead').querySelector('.pt').textContent =
+    (loan?.loanId||loanId.slice(0,8).toUpperCase())+' — '+(loan?.borrowerName||'User');
+
+  // Highlight selected
+  document.querySelectorAll('[id^="cll-"]').forEach(el=>{ el.style.borderColor='transparent'; el.style.background=''; });
+  const sel = document.getElementById('cll-'+loanId);
+  if (sel) { sel.style.background='var(--gold-faint)'; sel.style.borderColor='var(--border)'; }
+
+  if (chatUnsub) chatUnsub();
+  const q = query(collection(db,'chatMessages'), where('loanId','==',loanId), orderBy('timestamp','asc'));
+  chatUnsub = onSnapshot(q, snap=>{
+    const el = document.getElementById('chatMessages');
+    if (snap.empty) { el.innerHTML='<div class="empty" style="margin:auto"><div class="empty-icon">💬</div><div class="empty-text">No messages yet</div></div>'; return; }
+    el.innerHTML = snap.docs.map(d=>{
+      const m=d.data();
+      const isAdmin = m.senderId==='admin';
+      const isSys   = m.senderId==='system';
+      if (isSys) return `<div class="chat-msg system">${m.message}</div>`;
+      return `<div class="chat-msg ${isAdmin?'admin':'user'}">
+        <div class="who">${isAdmin?'Admin':m.senderName||'User'}</div>
+        ${m.message}
+        <div class="ts">${m.timestamp?new Date(m.timestamp).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):''}</div>
+      </div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  });
+};
+
+window.sendAdminChat = async function() {
+  const input = document.getElementById('chatInput');
+  const msg   = input.value.trim();
+  if (!msg || !currentChatLoanId) return;
+  input.value='';
+  try {
+    await addDoc(collection(db,'chatMessages'),{
+      loanId:    currentChatLoanId,
+      senderId:  'admin',
+      senderName:'FinLend Admin',
+      message:   msg,
+      timestamp: new Date().toISOString(),
+    });
+  } catch(e) { showToast('Send failed: '+e.message,'err'); }
+};
+
+// ══ HELPERS ══
+function fmt(n){ return Math.round(n||0).toLocaleString('en-IN'); }
+
+function statusBadge(s){
+  const m={'pending admin':'<span class="badge amber">PENDING</span>',
+           pending:'<span class="badge amber">PENDING</span>',
+           approved:'<span class="badge green">APPROVED</span>',
+           rejected:'<span class="badge red">REJECTED</span>',
+           active:'<span class="badge green">ACTIVE</span>'};
+  return m[s]||`<span class="badge gold">${(s||'—').toUpperCase()}</span>`;
+}
+function kycBadge(s){
+  return s==='verified'?'<span class="badge green">Verified</span>':
+         s==='submitted'?'<span class="badge amber">Submitted</span>':
+         s==='rejected'?'<span class="badge red">Rejected</span>':
+         '<span class="badge gold">Pending</span>';
+}
+function detailItems(fields){
+  return fields.map(([l,v])=>`<div class="ld-item"><div class="ld-l">${l}</div><div class="ld-v">${v}</div></div>`).join('');
+}
+
+window.enlargeImg = function(src) {
+  if (!src) return;
+  document.getElementById('overlayImg').src = src;
+  document.getElementById('imgOverlay').classList.add('open');
+};
+window.closeImgOverlay = function(){ document.getElementById('imgOverlay').classList.remove('open'); };
+
+window.adminSignOut = async function(){
+  if(chatUnsub) chatUnsub();
+  await fbSignOut(auth);
+  // Show login screen again
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.querySelector('.sidebar').style.display      = 'none';
+  document.querySelector('.main').style.display         = 'none';
+};
+
+window.showToast = function(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3800);
+};
+
+// ── Login screen functions ──
+const loginErrMap = {
+  'auth/user-not-found':     'No account found with this email.',
+  'auth/wrong-password':     'Incorrect password.',
+  'auth/invalid-credential': 'Invalid email or password.',
+  'auth/too-many-requests':  'Too many attempts. Please wait.',
+};
+
+function showLoginError(msg) {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.querySelector('.sidebar').style.display      = 'none';
+  document.querySelector('.main').style.display         = 'none';
+  // Show error as a toast
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast err show';
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+window.doAdminLogin = async function() {
+  const email = document.getElementById('li-email').value.trim();
+  const pass  = document.getElementById('li-pass').value;
+  const eErr  = document.getElementById('li-emailErr');
+  const pErr  = document.getElementById('li-passErr');
+  eErr.classList.remove('show'); pErr.classList.remove('show');
+
+  let ok = true;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { eErr.classList.add('show'); ok=false; }
+  if (pass.length < 6)                               { pErr.classList.add('show'); ok=false; }
+  if (!ok) return;
+
+  const btn = document.getElementById('li-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="border-top-color:#fff"></span>VERIFYING…';
+
+  try {
+    const { signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+
+    // Role check done in onAuthStateChanged — just verify here too
+    const snap = await getDoc(doc(db,'users',cred.user.uid));
+    if (!snap.exists() || snap.data().role !== 'admin') {
+      await fbSignOut(auth);
+      btn.disabled = false;
+      btn.textContent = 'ACCESS ADMIN PANEL';
+      showLoginError('Access denied — not an admin account.');
+      return;
+    }
+    // onAuthStateChanged will handle the rest
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'ACCESS ADMIN PANEL';
+    showLoginError(loginErrMap[e.code] || e.message);
+  }
+};
+
+function startClock(){
+  const el=document.getElementById('adminClock');
+  const tick=()=>{ el.textContent=new Date().toLocaleString('en-IN',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); };
+  tick(); setInterval(tick,30000);
+}
+</script>
+
+<script>
+// Eye toggle for login
+function liToggleEye() {
+  const inp  = document.getElementById('li-pass');
+  const icon = document.getElementById('li-eyeIcon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.style.color = 'rgba(198,40,40,.7)';
+  } else {
+    inp.type = 'password';
+    icon.style.color = '';
+  }
+}
+
+// Enter key on login fields
+document.addEventListener('DOMContentLoaded', () => {
+  ['li-email','li-pass'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', e => { if (e.key==='Enter') window.doAdminLogin?.(); });
+  });
+});
+
+// Non-module section switching
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  const btn=document.querySelector(`.nav-item[onclick*="${id}"]`);
+  if(btn) btn.classList.add('active');
+  const titles={dashboard:'Admin Dashboard',applications:'Loan Applications',
+    active:'Active Loans',users:'All Users',kyc:'KYC Verification',chat:'Chat with Users'};
+  document.getElementById('topTitle').textContent=titles[id]||'Admin Panel';
+  document.getElementById('mainContent').scrollTop=0;
+}
+</script>
+</body>
+</html>

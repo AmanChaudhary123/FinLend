@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FinLend — Secure Access</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy-deep:   #07091a;
+      --navy:        #0b0f24;
+      --navy-card:   #0d1228;
+      --navy-field:  #111627;
+      --royal:       #1a237e;
+      --gold:        #c9a84c;
+      --gold-light:  #ddb96a;
+      --gold-dim:    rgba(201,168,76,0.55);
+      --gold-faint:  rgba(201,168,76,0.18);
+      --ivory:       #f5f0e8;
+      --silver:      rgba(255,255,255,0.55);
+      --muted:       rgba(255,255,255,0.28);
+      --error:       #e07070;
+      --success:     #6fbf7a;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: var(--navy-deep);
+      color: var(--ivory);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 110% 80% at 10% 0%,   rgba(26,35,126,0.70) 0%, transparent 55%),
+        radial-gradient(ellipse 70%  60% at 92% 100%,  rgba(26,35,126,0.45) 0%, transparent 55%),
+        radial-gradient(ellipse 50%  40% at 50% 50%,   rgba(201,168,76,0.06) 0%, transparent 70%),
+        linear-gradient(180deg, #07091a 0%, #0b0f24 100%);
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 520px; height: 520px;
+      top: -160px; left: -180px;
+      background: radial-gradient(circle, rgba(26,35,126,0.55) 0%, transparent 70%);
+    }
+    .orb-2 {
+      width: 380px; height: 380px;
+      bottom: -120px; right: -100px;
+      background: radial-gradient(circle, rgba(26,35,126,0.45) 0%, transparent 70%);
+    }
+    .orb-3 {
+      width: 260px; height: 260px;
+      top: 40%; left: 55%;
+      background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+    }
+
+    .bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+    }
+
+    .card-shell {
+      position: relative; z-index: 10;
+      display: flex;
+      width: min(940px, 96vw);
+      height: min(640px, 96vh);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(201,168,76,0.15),
+        0 40px 100px rgba(0,0,0,0.65),
+        inset 0 1px 0 rgba(201,168,76,0.12);
+      animation: rise .9s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes rise {
+      from { opacity:0; transform:translateY(36px) scale(.97); }
+      to   { opacity:1; transform:translateY(0)    scale(1);   }
+    }
+
+    .brand-panel {
+      width: 38%;
+      flex-shrink: 0;
+      background: linear-gradient(160deg, #1a237e 0%, #0f1650 40%, #080c1e 100%);
+      border-right: 1px solid rgba(201,168,76,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 120% 80% at 50% 30%, rgba(201,168,76,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 80%  60% at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 50%);
+    }
+
+    .brand-panel::after {
+      content: '';
+      position: absolute;
+      top: 28px; left: 28px; right: 28px; bottom: 28px;
+      border: 1px solid rgba(201,168,76,0.08);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .crest {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .brand-name {
+      font-family: 'Cinzel', serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--gold);
+      text-shadow: 0 2px 30px rgba(201,168,76,0.35);
+      line-height: 1;
+      position: relative;
+    }
+
+    .brand-est {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.78rem;
+      letter-spacing: 0.32em;
+      color: rgba(201,168,76,0.45);
+      margin-top: 5px;
+      text-align: center;
+      position: relative;
+    }
+
+    .gold-ornament {
+      display: flex; align-items: center; gap: 10px;
+      margin: 22px 0;
+      position: relative;
+    }
+    .orn-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent); }
+    .orn-diamond {
+      width: 6px; height: 6px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    .brand-copy {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.08rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      line-height: 1.8;
+      position: relative;
+    }
+    .brand-copy em {
+      color: rgba(201,168,76,0.75);
+      font-style: italic;
+    }
+
+    .panel-badge {
+      position: relative;
+      margin-top: 28px;
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(201,168,76,0.07);
+      border: 1px solid rgba(201,168,76,0.18);
+      border-radius: 30px;
+      padding: 7px 16px;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .badge-text {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.6);
+      font-weight: 600;
+    }
+
+    .form-panel {
+      flex: 1;
+      background: var(--navy-card);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 20px 0;
+      background: transparent;
+      border: none;
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.3);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.3s;
+    }
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 20%; right: 20%;
+      height: 2px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+    }
+    .tab-btn.active {
+      color: var(--gold);
+    }
+    .tab-btn.active::after { transform: scaleX(1); }
+
+    .forms-viewport {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .form-slide {
+      position: absolute; inset: 0;
+      padding: 32px 44px 28px;
+      overflow-y: auto;
+      transition: transform 0.45s cubic-bezier(.77,0,.175,1), opacity 0.3s ease;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201,168,76,0.2) transparent;
+    }
+    .form-slide::-webkit-scrollbar { width: 4px; }
+    .form-slide::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.2); border-radius: 2px; }
+
+    .form-slide.login-form  { transform: translateX(0);     opacity: 1; }
+    .form-slide.signup-form { transform: translateX(100%);  opacity: 0; }
+    .form-slide.login-form.slide-out  { transform: translateX(-100%); opacity: 0; }
+    .form-slide.signup-form.slide-in  { transform: translateX(0);      opacity: 1; }
+
+    .form-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--ivory);
+      letter-spacing: 0.05em;
+      margin-bottom: 3px;
+    }
+    .form-subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--gold-dim);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+
+    .btn-google {
+      width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 11px;
+      padding: 11px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      color: rgba(255,255,255,0.75);
+      font-family: 'Raleway', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, transform .15s;
+      margin-bottom: 18px;
+    }
+    .btn-google:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.22);
+      transform: translateY(-1px);
+    }
+    .g-icon { width: 17px; height: 17px; }
+
+    .or-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 18px;
+    }
+    .or-line { flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+    .or-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+
+    .fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .fields-row.single { grid-template-columns: 1fr; }
+    .field-full { grid-column: 1 / -1; }
+
+    .fld { display: flex; flex-direction: column; }
+
+    .fld-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 5px;
+    }
+
+    .fld-input {
+      width: 100%;
+      padding: 10px 13px;
+      background: var(--navy-field);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 4px;
+      color: var(--ivory);
+      font-family: 'Raleway', sans-serif;
+      font-size: 0.87rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .fld-input::placeholder { color: rgba(255,255,255,0.15); }
+    .fld-input:focus {
+      border-color: rgba(201,168,76,0.45);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.07);
+    }
+    .fld-input.err { border-color: rgba(224,112,112,0.5); }
+
+    .fld-err {
+      font-size: 0.7rem;
+      color: var(--error);
+      margin-top: 4px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      display: none;
+    }
+    .fld-err.show { display: block; }
+
+    .pass-wrap { position: relative; }
+    .pass-wrap .fld-input { padding-right: 38px; }
+    .eye-btn {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.25); padding: 0;
+      transition: color .2s;
+      display: flex; align-items: center;
+    }
+    .eye-btn:hover { color: var(--gold-dim); }
+
+    .strength-row { display: flex; gap: 3px; margin-top: 5px; }
+    .s-seg { flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.07); transition: background .3s; }
+    .s-lbl { font-size: 0.66rem; color: rgba(255,255,255,0.25); margin-top: 2px; font-family: 'Cormorant Garamond', serif; font-style: italic; }
+
+    .forgot-row {
+      text-align: right;
+      margin: -6px 0 16px;
+    }
+    .forgot-link {
+      font-size: 0.75rem;
+      color: rgba(201,168,76,0.5);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: color .2s;
+    }
+    .forgot-link:hover { color: var(--gold); }
+
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #b8933e 0%, #ddb96a 40%, #c9a84c 70%, #b8933e 100%);
+      background-size: 200% auto;
+      border: none; border-radius: 4px;
+      color: #07091a;
+      font-family: 'Cinzel', serif;
+      font-size: 0.83rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      transition: background-position .5s, box-shadow .3s, transform .15s;
+      box-shadow: 0 4px 24px rgba(201,168,76,0.22);
+      margin-top: 4px;
+    }
+    .btn-submit:hover {
+      background-position: right center;
+      box-shadow: 0 6px 32px rgba(201,168,76,0.38);
+      transform: translateY(-1px);
+    }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .step-indicator {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 20px;
+    }
+    .sdot {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      color: rgba(201,168,76,0.3);
+      transition: all .3s; flex-shrink: 0;
+    }
+    .sdot.on  { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+    .sdot.done { border-color: var(--gold); background: var(--gold); color: #07091a; }
+    .sline { flex: 1; height: 1px; background: rgba(201,168,76,0.1); transition: background .3s; }
+    .sline.done { background: rgba(201,168,76,0.4); }
+
+    .step-content { display: none; }
+    .step-content.active { display: block; }
+
+    .step-nav { display: flex; gap: 10px; margin-top: 14px; }
+    .btn-back {
+      padding: 11px 18px;
+      background: transparent;
+      border: 1px solid rgba(201,168,76,0.18);
+      border-radius: 4px;
+      color: rgba(255,255,255,0.35);
+      font-family: 'Raleway', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.07em;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-back:hover { border-color: rgba(201,168,76,0.4); color: var(--ivory); }
+
+    .uid-row {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(201,168,76,0.05);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 4px;
+      padding: 9px 14px;
+      margin-bottom: 14px;
+    }
+    .uid-l { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(201,168,76,0.4); }
+    .uid-v { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold); letter-spacing: 0.12em; }
+
+    .modal-bg {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .modal-bg.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: #0d1228;
+      border: 1px solid rgba(201,168,76,0.22);
+      border-radius: 6px;
+      padding: 40px 36px;
+      width: min(400px, 90vw);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+      transform: scale(.95) translateY(10px);
+      transition: transform .3s;
+    }
+    .modal-bg.open .modal { transform: scale(1) translateY(0); }
+    .modal-title { font-family: 'Cinzel', serif; font-size: 1.15rem; color: var(--gold); letter-spacing: 0.06em; margin-bottom: 6px; }
+    .modal-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; color: rgba(255,255,255,0.38); font-size: 0.88rem; margin-bottom: 22px; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 18px; }
+    .btn-modal-cancel { flex: 1; padding: 11px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: rgba(255,255,255,0.35); font-family: 'Raleway', sans-serif; font-size: 0.78rem; letter-spacing: .07em; cursor: pointer; transition: all .2s; }
+    .btn-modal-cancel:hover { border-color: rgba(255,255,255,0.25); color: var(--ivory); }
+    .btn-modal-send { flex: 1; padding: 11px; background: linear-gradient(135deg, #c9a84c, #ddb96a); border: none; border-radius: 4px; color: #07091a; font-family: 'Cinzel', serif; font-size: 0.78rem; font-weight: 700; letter-spacing: .12em; cursor: pointer; transition: opacity .2s; }
+    .btn-modal-send:hover { opacity: .88; }
+
+    .toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: rgba(13,18,40,0.96);
+      border-radius: 40px;
+      padding: 11px 22px;
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      opacity: 0; pointer-events: none;
+      transition: all .35s ease;
+      z-index: 9999; white-space: nowrap;
+      font-family: 'Raleway', sans-serif;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+    .toast.err::before { background: var(--error); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.ok  { border: 1px solid rgba(111,191,122,0.3); color: #a8e4b0; }
+    .toast.err { border: 1px solid rgba(224,112,112,0.3); color: #f0a8a8; }
+
+    .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(7,9,26,0.25); border-top-color: #07091a; border-radius: 50%; animation: sp .55s linear infinite; vertical-align: middle; margin-right: 5px; }
+    @keyframes sp { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      .brand-panel { display: none; }
+      .form-slide { padding: 28px 24px; }
+      .card-shell { height: auto; min-height: 0; overflow: auto; }
+      html, body { overflow: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="card-shell">
+
+    <div class="brand-panel">
+      <div class="crest">
+        <svg width="76" height="76" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="38" cy="38" r="36" stroke="rgba(201,168,76,0.25)" stroke-width="1"/>
+          <circle cx="38" cy="38" r="28" stroke="rgba(201,168,76,0.15)" stroke-width="1"/>
+          <polygon points="38,6 43,27 66,27 48,40 55,62 38,50 21,62 28,40 10,27 33,27"
+            fill="rgba(201,168,76,0.08)" stroke="#c9a84c" stroke-width="1.2" stroke-linejoin="round"/>
+          <text x="38" y="46" text-anchor="middle"
+            font-family="Cinzel,serif" font-size="15" font-weight="700" fill="#c9a84c" letter-spacing="2">FL</text>
+        </svg>
+      </div>
+
+      <div class="brand-name">FinLend</div>
+      <div class="brand-est">Est. 2025 · Trusted Finance</div>
+
+      <div class="gold-ornament">
+        <div class="orn-line"></div>
+        <div class="orn-diamond"></div>
+        <div class="orn-line"></div>
+      </div>
+
+      <p class="brand-copy">
+        Where <em>financial dignity</em><br>
+        meets unwavering trust.<br>
+        <br>
+        Your journey to<br>
+        <em>prosperity</em> begins here.
+      </p>
+
+      <div class="panel-badge">
+        <div class="badge-dot"></div>
+        <span class="badge-text">Secured & Encrypted</span>
+      </div>
+    </div>
+
+    <div class="form-panel">
+
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tabLogin"  onclick="switchTab('login')">SIGN IN</button>
+        <button class="tab-btn"        id="tabSignup" onclick="switchTab('signup')">CREATE ACCOUNT</button>
+      </div>
+
+      <div class="forms-viewport">
+
+        <!-- LOGIN FORM -->
+        <div class="form-slide login-form" id="loginSlide">
+          <div class="form-title">Welcome Back</div>
+          <div class="form-subtitle">Sign in to your FinLend account</div>
+
+          <button class="btn-google" id="btnGoogleLogin">
+            <svg class="g-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            CONTINUE WITH GOOGLE
+          </button>
+
+          <div class="or-row">
+            <div class="or-line"></div>
+            <span class="or-text">or with email</span>
+            <div class="or-line"></div>
+          </div>
+
+          <div class="fields-row single" style="margin-bottom:12px;">
+            <div class="fld">
+              <label class="fld-label">Email Address</label>
+              <input class="fld-input" type="email" id="lEmail" placeholder="your@email.com" autocomplete="email"/>
+              <div class="fld-err" id="lEmailErr">Enter a valid email address.</div>
+            </div>
+          </div>
+
+          <div class="fields-row single" style="margin-bottom:6px;">
+            <div class="fld">
+              <label class="fld-label">Password</label>
+              <div class="pass-wrap">
+                <input class="fld-input" type="password" id="lPass" placeholder="••••••••" autocomplete="current-password"/>
+                <button class="eye-btn" onclick="toggleEye('lPass',this)" tabindex="-1">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                </button>
+              </div>
+              <div class="fld-err" id="lPassErr">Password must be at least 6 characters.</div>
+            </div>
+          </div>
+
+          <div class="forgot-row">
+            <a href="#" class="forgot-link" id="forgotLink">Forgot password?</a>
+          </div>
+
+          <button class="btn-submit" id="btnLogin">SIGN IN</button>
+        </div>
+
+        <!-- SIGNUP FORM -->
+        <div class="form-slide signup-form" id="signupSlide">
+          <div class="form-title">Create Account</div>
+          <div class="form-subtitle">Join FinLend — takes under 2 minutes</div>
+
+          <button class="btn-google" id="btnGoogleSignup">
+            <svg class="g-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            SIGN UP WITH GOOGLE
+          </button>
+
+          <div class="or-row">
+            <div class="or-line"></div>
+            <span class="or-text">or fill in details</span>
+            <div class="or-line"></div>
+          </div>
+
+          <div class="step-indicator">
+            <div class="sdot on"  id="sd1">1</div>
+            <div class="sline"    id="sl1"></div>
+            <div class="sdot"     id="sd2">2</div>
+            <div class="sline"    id="sl2"></div>
+            <div class="sdot"     id="sd3">3</div>
+          </div>
+
+          <!-- Step 1 -->
+          <div class="step-content active" id="sc1">
+            <div class="fields-row">
+              <div class="fld field-full">
+                <label class="fld-label">Full Name</label>
+                <input class="fld-input" type="text" id="sName" placeholder="Your Name"/>
+                <div class="fld-err" id="sNameErr">Enter your full name.</div>
+              </div>
+            </div>
+            <div class="fields-row">
+              <div class="fld">
+                <label class="fld-label">Email Address</label>
+                <input class="fld-input" type="email" id="sEmail" placeholder="you@example.com"/>
+                <div class="fld-err" id="sEmailErr">Enter a valid email.</div>
+              </div>
+              <div class="fld">
+                <label class="fld-label">Phone Number</label>
+                <input class="fld-input" type="tel" id="sPhone" placeholder="+91 12345 67890"/>
+                <div class="fld-err" id="sPhoneErr">Enter a valid number.</div>
+              </div>
+            </div>
+            <div class="fields-row single">
+              <div class="fld">
+                <label class="fld-label">Date of Birth <span style="color:rgba(201,168,76,0.4);font-size:0.6rem;font-weight:400;letter-spacing:0.08em;">(Must be 18+)</span></label>
+                <input class="fld-input" type="date" id="sDob"/>
+                <div class="fld-err" id="sDobErr">Select your date of birth.</div>
+              </div>
+            </div>
+            <div class="step-nav">
+              <button class="btn-submit" style="margin-top:0;" onclick="goStep(2)">NEXT →</button>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-content" id="sc2">
+            <div class="fields-row single">
+              <div class="fld">
+                <label class="fld-label">Residential Address</label>
+                <input class="fld-input" type="text" id="sAddr" placeholder="123, MG Road, Mumbai, Maharashtra"/>
+                <div class="fld-err" id="sAddrErr">Enter your address.</div>
+              </div>
+            </div>
+            <div class="fields-row">
+              <div class="fld">
+                <label class="fld-label">Password</label>
+                <div class="pass-wrap">
+                  <input class="fld-input" type="password" id="sPass" placeholder="Min. 8 characters" oninput="checkStrength(this.value)"/>
+                  <button class="eye-btn" onclick="toggleEye('sPass',this)" tabindex="-1">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                  </button>
+                </div>
+                <div class="strength-row">
+                  <div class="s-seg" id="ss1"></div><div class="s-seg" id="ss2"></div>
+                  <div class="s-seg" id="ss3"></div><div class="s-seg" id="ss4"></div>
+                </div>
+                <div class="s-lbl" id="sLbl">—</div>
+                <div class="fld-err" id="sPassErr">Minimum 8 characters required.</div>
+              </div>
+              <div class="fld">
+                <label class="fld-label">Confirm Password</label>
+                <div class="pass-wrap">
+                  <input class="fld-input" type="password" id="sConf" placeholder="Repeat password"/>
+                  <button class="eye-btn" onclick="toggleEye('sConf',this)" tabindex="-1">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                  </button>
+                </div>
+                <div class="fld-err" id="sConfErr">Passwords do not match.</div>
+              </div>
+            </div>
+            <div class="step-nav">
+              <button class="btn-back" onclick="goStep(1)">← Back</button>
+              <button class="btn-submit" style="margin-top:0;flex:1;" onclick="goStep(3)">REVIEW →</button>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-content" id="sc3">
+            <div class="uid-row">
+              <span class="uid-l">Your Member ID</span>
+              <span class="uid-v" id="uidPrev">USR — — —</span>
+            </div>
+            <div id="reviewItems" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:14px;"></div>
+            <div class="step-nav">
+              <button class="btn-back" onclick="goStep(2)">← Edit</button>
+              <button class="btn-submit" style="margin-top:0;flex:1;" id="btnSignup">CREATE ACCOUNT</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- RESET MODAL -->
+  <div class="modal-bg" id="resetModal">
+    <div class="modal">
+      <div class="modal-title">Reset Password</div>
+      <div class="modal-sub">We'll send a secure reset link to your email.</div>
+      <div class="fld">
+        <label class="fld-label">Email Address</label>
+        <input class="fld-input" type="email" id="rEmail" placeholder="your@email.com"/>
+        <div class="fld-err" id="rEmailErr">Enter a valid email.</div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-modal-cancel" onclick="closeReset()">Cancel</button>
+        <button class="btn-modal-send"   id="btnReset">SEND LINK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- FIREBASE -->
+  <script type="module">
+    import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+      signInWithPopup, updateProfile, GoogleAuthProvider,
+      sendPasswordResetEmail, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, doc, setDoc, getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const cfg = {
+      apiKey:            "AIzaSyBMlCi_SXUytX64JzIxA_WpQGFIsAXQjtU",
+      authDomain:        "finlend-b7737.firebaseapp.com",
+      projectId:         "finlend-b7737",
+      storageBucket:     "finlend-b7737.firebasestorage.app",
+      messagingSenderId: "600903478672",
+      appId:             "1:600903478672:web:5714e65c3b10c0c998d715",
+      measurementId:     "G-7YKWWWHB1M"
+    };
+
+    const app  = initializeApp(cfg);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+    const GP   = new GoogleAuthProvider();
+
+    let isSavingProfile = false;
+
+    onAuthStateChanged(auth, u => {
+      if (u && !isSavingProfile) window.location.href = 'main/home.html';
+    });
+
+    const validEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    const validPhone = p => /^[+]?[\d\s\-()\u0020]{7,15}$/.test(p);
+
+    window.showToast = (msg, type='ok') => {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3800);
+    };
+
+    const errMap = {
+      'auth/user-not-found':      'No account found with this email.',
+      'auth/wrong-password':      'Incorrect password.',
+      'auth/invalid-credential':  'Invalid email or password.',
+      'auth/email-already-in-use':'This email is already registered.',
+      'auth/too-many-requests':   'Too many attempts. Please wait.',
+      'auth/weak-password':       'Choose a stronger password.',
+    };
+
+    async function genUID() {
+      try {
+        const ref  = doc(db, 'meta', 'userCounter');
+        const snap = await getDoc(ref);
+        const n    = (snap.exists() ? snap.data().lastNumber : 1000) + 1;
+        await setDoc(ref, { lastNumber: n }, { merge: true });
+        return 'USR' + n;
+      } catch { return 'USR' + (1000 + Math.floor(Math.random() * 8999)); }
+    }
+
+    async function saveUser(uid, d) {
+      await setDoc(doc(db, 'users', uid), {
+        name: d.name, email: d.email, phone: d.phone,
+        address: d.address, dateOfBirth: d.dob,
+        uniqueUserNumber: d.uid,
+        creditScore: 650,
+        createdAt: new Date().toISOString(),
+        role: 'user',
+      });
+    }
+
+    /* LOGIN */
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const email = document.getElementById('lEmail').value.trim();
+      const pass  = document.getElementById('lPass').value;
+      let ok = true;
+      const se = (id, v) => { document.getElementById(id).classList.toggle('show', v); if(v) ok=false; };
+      se('lEmailErr', !validEmail(email));
+      se('lPassErr',  pass.length < 6);
+      if (!ok) return;
+
+      const btn = document.getElementById('btnLogin');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span>SIGNING IN…';
+
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        showToast('Welcome back!');
+        setTimeout(() => window.location.href = 'main/home.html', 900);
+      } catch (e) {
+        btn.disabled = false; btn.textContent = 'SIGN IN';
+        showToast(errMap[e.code] || e.message, 'err');
+      }
+    });
+
+    document.getElementById('lPass').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btnLogin').click();
+    });
+
+    /* GOOGLE LOGIN */
+    document.getElementById('btnGoogleLogin').addEventListener('click', async () => {
+      try {
+        await signInWithPopup(auth, GP);
+        showToast('Signed in with Google!');
+        setTimeout(() => window.location.href = 'main/home.html', 800);
+      } catch (e) { if (e.code !== 'auth/popup-closed-by-user') showToast(e.message,'err'); }
+    });
+
+    /* GOOGLE SIGNUP */
+    document.getElementById('btnGoogleSignup').addEventListener('click', async () => {
+      try {
+        isSavingProfile = true;
+        const r = await signInWithPopup(auth, GP);
+        const u = r.user;
+        const snap = await getDoc(doc(db, 'users', u.uid));
+        if (!snap.exists()) {
+          const uniqueNum = await genUID();
+          await saveUser(u.uid, { name: u.displayName||'', email: u.email||'', phone:'', address:'', dob:'', uid: uniqueNum });
+        }
+        showToast('Account created! Welcome.');
+        isSavingProfile = false;
+        setTimeout(() => window.location.href = 'main/home.html', 900);
+      } catch (e) {
+        isSavingProfile = false;
+        if (e.code !== 'auth/popup-closed-by-user') showToast(e.message,'err');
+      }
+    });
+
+    /* SIGNUP */
+    document.getElementById('btnSignup').addEventListener('click', async () => {
+      const btn = document.getElementById('btnSignup');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span>CREATING…';
+
+      const email   = document.getElementById('sEmail').value.trim();
+      const pass    = document.getElementById('sPass').value;
+      const name    = document.getElementById('sName').value.trim();
+      const phone   = document.getElementById('sPhone').value.trim();
+      const address = document.getElementById('sAddr').value.trim();
+      const dob     = document.getElementById('sDob').value;
+
+      try {
+        isSavingProfile = true;
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(cred.user, { displayName: name });
+
+        const uniqueNum = await genUID();
+        document.getElementById('uidPrev').textContent = uniqueNum;
+
+        await saveUser(cred.user.uid, { name, email, phone, address, dob, uid: uniqueNum });
+
+        showToast('Welcome to FinLend, ' + name.split(' ')[0] + '!');
+        isSavingProfile = false;
+        setTimeout(() => window.location.href = 'main/home.html', 1100);
+      } catch (e) {
+        isSavingProfile = false;
+        btn.disabled = false; btn.textContent = 'CREATE ACCOUNT';
+        showToast(errMap[e.code] || e.message, 'err');
+      }
+    });
+
+    /* RESET */
+    document.getElementById('forgotLink').addEventListener('click', e => {
+      e.preventDefault();
+      const v = document.getElementById('lEmail').value.trim();
+      if (validEmail(v)) document.getElementById('rEmail').value = v;
+      document.getElementById('resetModal').classList.add('open');
+    });
+
+    window.closeReset = () => document.getElementById('resetModal').classList.remove('open');
+    document.getElementById('resetModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('resetModal')) closeReset();
+    });
+
+    document.getElementById('btnReset').addEventListener('click', async () => {
+      const email = document.getElementById('rEmail').value.trim();
+      const err   = document.getElementById('rEmailErr');
+      err.classList.remove('show');
+      if (!validEmail(email)) { err.classList.add('show'); return; }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        closeReset();
+        showToast('Reset link sent — check your inbox.');
+      } catch (e) { showToast(e.message, 'err'); }
+    });
+  </script>
+
+  <!-- NON-MODULE JS -->
+  <script>
+    function switchTab(t) {
+      const loginSlide  = document.getElementById('loginSlide');
+      const signupSlide = document.getElementById('signupSlide');
+      const tL = document.getElementById('tabLogin');
+      const tS = document.getElementById('tabSignup');
+
+      if (t === 'signup') {
+        loginSlide.classList.add('slide-out');
+        signupSlide.classList.add('slide-in');
+        tL.classList.remove('active'); tS.classList.add('active');
+      } else {
+        loginSlide.classList.remove('slide-out');
+        signupSlide.classList.remove('slide-in');
+        tL.classList.add('active'); tS.classList.remove('active');
+      }
+    }
+
+    function toggleEye(id, btn) {
+      const inp = document.getElementById(id);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.style.color = inp.type === 'text' ? 'rgba(201,168,76,0.6)' : '';
+    }
+
+    function checkStrength(v) {
+      let s = 0;
+      if (v.length >= 8)        s++;
+      if (/[A-Z]/.test(v))      s++;
+      if (/[0-9]/.test(v))      s++;
+      if (/[^A-Za-z0-9]/.test(v)) s++;
+      const c = ['#e07070','#ffb74d','#fff176','#6fbf7a'];
+      const l = ['Weak','Fair','Good','Strong'];
+      for (let i=1;i<=4;i++) {
+        document.getElementById('ss'+i).style.background = i<=s ? c[s-1] : 'rgba(255,255,255,0.07)';
+      }
+      const lbl = document.getElementById('sLbl');
+      lbl.textContent = v ? l[s-1]||'Weak' : '—';
+      lbl.style.color = v ? c[s-1]||c[0] : '';
+    }
+
+    let curStep = 1;
+    function goStep(n) {
+      if (n > curStep) {
+        if (curStep === 1 && !validateStep1()) return;
+        if (curStep === 2 && !validateStep2()) return;
+      }
+      curStep = n;
+      for (let i=1;i<=3;i++) {
+        document.getElementById('sc'+i).classList.toggle('active', i===n);
+        const dot = document.getElementById('sd'+i);
+        dot.classList.remove('on','done');
+        if (i < n)     dot.classList.add('done');
+        if (i === n)   dot.classList.add('on');
+        if (i <= 2) document.getElementById('sl'+i).classList.toggle('done', i<n);
+      }
+      if (n===3) buildReview();
+    }
+
+    function validateStep1() {
+      const name  = document.getElementById('sName').value.trim();
+      const email = document.getElementById('sEmail').value.trim();
+      const phone = document.getElementById('sPhone').value.trim();
+      const dob   = document.getElementById('sDob').value;
+      let ok = true;
+      const se = (id, v) => { document.getElementById(id).classList.toggle('show', v); if(v) ok=false; };
+
+      se('sNameErr',  name.length < 2);
+      se('sEmailErr', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+      se('sPhoneErr', !/^[+]?[\d\s\-()\u0020]{7,15}$/.test(phone));
+
+      // Age validation — must be 18+
+      const dobDate = dob ? new Date(dob) : null;
+      const today = new Date();
+      const age = dobDate ? Math.floor((today - dobDate) / (365.25 * 24 * 60 * 60 * 1000)) : -1;
+      const dobInvalid = !dob || age < 18;
+      document.getElementById('sDobErr').textContent = !dob
+        ? 'Select your date of birth.'
+        : 'You must be at least 18 years old.';
+      se('sDobErr', dobInvalid);
+
+      return ok;
+    }
+
+    function validateStep2() {
+      const addr = document.getElementById('sAddr').value.trim();
+      const pass = document.getElementById('sPass').value;
+      const conf = document.getElementById('sConf').value;
+      let ok = true;
+      const se = (id,v) => { document.getElementById(id).classList.toggle('show',v); if(v) ok=false; };
+      se('sAddrErr', addr.length < 5);
+      se('sPassErr', pass.length < 8);
+      se('sConfErr', pass !== conf);
+      return ok;
+    }
+
+    function buildReview() {
+      const fields = [
+        ['Name',    document.getElementById('sName').value],
+        ['Email',   document.getElementById('sEmail').value],
+        ['Phone',   document.getElementById('sPhone').value],
+        ['DOB',     document.getElementById('sDob').value],
+        ['Address', document.getElementById('sAddr').value],
+      ];
+      document.getElementById('reviewItems').innerHTML = fields.map(([l,v]) => `
+        <div>
+          <div style="font-size:.64rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(201,168,76,0.45);margin-bottom:3px;">${l}</div>
+          <div style="font-size:.82rem;color:rgba(255,255,255,0.55);border-bottom:1px solid rgba(201,168,76,0.08);padding-bottom:5px;">${v||'—'}</div>
+        </div>
+      `).join('');
+      document.getElementById('uidPrev').textContent = 'USR####';
+    }
+  </script>
+</body>
+</html>

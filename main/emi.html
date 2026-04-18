@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FinLend — Pay EMI</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07091a;--card:#0d1228;--field:#111627;
+  --gold:#c9a84c;--gold2:#ddb96a;--gold-dim:rgba(201,168,76,.5);
+  --gold-faint:rgba(201,168,76,.1);--ivory:#f5f0e8;--muted:rgba(255,255,255,.38);
+  --border:rgba(201,168,76,.15);--border2:rgba(255,255,255,.08);
+  --green:#6fbf7a;--red:#e07070;--amber:#ffb74d;
+}
+html,body{height:100%;background:var(--bg)}
+body{font-family:'Raleway',sans-serif;color:var(--ivory);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:20px;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 20%,rgba(26,35,126,.4) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%,rgba(26,35,126,.3) 0%,transparent 55%),
+    linear-gradient(180deg,#07091a 0%,#0b0f24 100%);
+}
+
+.header{text-align:center;margin-bottom:28px}
+.header .logo{font-family:'Cinzel',serif;font-size:1.6rem;font-weight:700;color:var(--gold);letter-spacing:.12em}
+.header .sub{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold-dim);font-size:.88rem;margin-top:4px}
+
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  width:min(460px,98vw);overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(201,168,76,.08);
+}
+.card-top{
+  background:linear-gradient(135deg,#1a237e 0%,#0d1228 100%);
+  padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.loan-id-lbl{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.1em;color:var(--gold)}
+.loan-status{font-size:.7rem;color:rgba(111,191,122,.8);background:rgba(111,191,122,.1);border:1px solid rgba(111,191,122,.25);padding:4px 10px;border-radius:20px;letter-spacing:.06em}
+
+.card-body{padding:24px}
+
+/* Timer */
+.timer-wrap{text-align:center;margin-bottom:20px}
+.timer-label{font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:6px}
+.timer-val{
+  font-family:'Cinzel',serif;font-size:2rem;font-weight:700;
+  color:var(--amber);letter-spacing:.1em;
+}
+.timer-bar{height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-top:6px}
+.timer-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--gold));border-radius:2px;transition:width .9s linear}
+
+/* Amount */
+.amount-box{
+  background:var(--gold-faint);border:1px solid var(--border);border-radius:6px;
+  padding:16px;text-align:center;margin-bottom:18px;
+}
+.amount-label{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:6px}
+.amount-val{font-family:'Cinzel',serif;font-size:2.2rem;font-weight:700;color:var(--gold)}
+.amount-sub{font-size:.72rem;color:var(--muted);margin-top:4px;font-family:'Cormorant Garamond',serif;font-style:italic}
+
+/* QR */
+.qr-wrap{display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.qr-box{
+  background:white;border-radius:8px;padding:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.qr-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#555;text-transform:uppercase}
+
+/* Loan details */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.det{background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:5px;padding:10px 12px}
+.det-l{font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:3px}
+.det-v{font-family:'Cinzel',serif;font-size:.85rem;color:var(--ivory)}
+
+/* Extra */
+.extra-box{background:rgba(201,168,76,.05);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:18px}
+.extra-title{font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:10px}
+.extra-input-row{display:flex;gap:8px}
+.extra-input-row input{
+  flex:1;padding:9px 12px;background:var(--field);
+  border:1px solid var(--border2);border-radius:4px;
+  color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.87rem;outline:none;
+}
+.extra-input-row input:focus{border-color:rgba(201,168,76,.4)}
+.extra-info{font-size:.73rem;color:var(--green);margin-top:6px;display:none}
+
+.btn{
+  padding:10px 18px;border-radius:4px;font-family:'Cinzel',serif;
+  font-size:.72rem;font-weight:600;letter-spacing:.12em;cursor:pointer;
+  border:none;transition:all .2s;
+}
+.btn-gold{background:linear-gradient(135deg,#b8933e,#ddb96a);color:#07091a}
+.btn-gold:hover{opacity:.88}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--gold-dim);color:var(--ivory)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{flex:1;padding:13px}
+
+/* Success overlay */
+.success-overlay{
+  display:none;position:absolute;inset:0;
+  background:rgba(7,9,26,.95);z-index:10;
+  align-items:center;justify-content:center;flex-direction:column;gap:14px;
+  border-radius:8px;
+}
+.success-overlay.show{display:flex}
+.success-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(111,191,122,.15);border:2px solid var(--green);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;
+  animation:pop .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.success-title{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--green);letter-spacing:.08em}
+.success-sub{font-family:'Cormorant Garamond',serif;font-style:italic;color:rgba(255,255,255,.5);font-size:.9rem;text-align:center}
+.success-amount{font-family:'Cinzel',serif;font-size:1.8rem;color:var(--gold)}
+
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.15);border-top-color:#07091a;border-radius:50%;animation:sp .55s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:rgba(13,18,40,.97);border-radius:40px;padding:10px 22px;
+  font-size:.8rem;opacity:0;pointer-events:none;transition:all .3s;z-index:9999;
+  white-space:nowrap;font-family:'Raleway',sans-serif;
+  display:flex;align-items:center;gap:8px;
+}
+.toast::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.toast.err::before{background:var(--red)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border:1px solid rgba(111,191,122,.3);color:#a8e4b0}
+.toast.err{border:1px solid rgba(224,112,112,.3);color:#f0a8a8}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">FinLend</div>
+  <div class="sub">Secure EMI Payment Portal</div>
+</div>
+
+<div class="card" style="position:relative">
+
+  <div class="card-top">
+    <div>
+      <div class="loan-id-lbl" id="emiLoanId">LN — — —</div>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:2px" id="emiMonthLabel">EMI Payment</div>
+    </div>
+    <div class="loan-status">SECURE PAYMENT</div>
+  </div>
+
+  <div class="card-body">
+    <!-- Timer -->
+    <div class="timer-wrap">
+      <div class="timer-label">Session Expires In</div>
+      <div class="timer-val" id="timerDisplay">05:00</div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+    </div>
+
+    <!-- Amount -->
+    <div class="amount-box">
+      <div class="amount-label">Amount Due</div>
+      <div class="amount-val" id="emiAmountDisplay">₹—</div>
+      <div class="amount-sub" id="emiAmountSub">Monthly EMI</div>
+    </div>
+
+    <!-- QR -->
+    <div class="qr-wrap">
+      <div class="qr-box">
+        <svg viewBox="0 0 100 100" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
+          <!-- Top-left finder -->
+          <rect x="5"  y="5"  width="30" height="30" rx="3" fill="none" stroke="#000" stroke-width="3"/>
+          <rect x="12" y="12" width="16" height="16" rx="1" fill="#000"/>
+          <!-- Top-right finder -->
+          <rect x="65" y="5"  width="30" height="30" rx="3" fill="none" stroke="#000" stroke-width="3"/>
+          <rect x="72" y="12" width="16" height="16" rx="1" fill="#000"/>
+          <!-- Bottom-left finder -->
+          <rect x="5"  y="65" width="30" height="30" rx="3" fill="none" stroke="#000" stroke-width="3"/>
+          <rect x="12" y="72" width="16" height="16" rx="1" fill="#000"/>
+          <!-- Data modules (decorative pattern) -->
+          <rect x="42" y="5"  width="7" height="7" fill="#000"/><rect x="52" y="5"  width="7" height="7" fill="#000"/>
+          <rect x="42" y="15" width="7" height="7" fill="#000"/>
+          <rect x="52" y="20" width="7" height="7" fill="#000"/>
+          <rect x="42" y="27" width="7" height="7" fill="#000"/>
+          <rect x="5"  y="42" width="7" height="7" fill="#000"/><rect x="15" y="42" width="7" height="7" fill="#000"/>
+          <rect x="5"  y="52" width="7" height="7" fill="#000"/>
+          <rect x="20" y="52" width="7" height="7" fill="#000"/>
+          <rect x="5"  y="57" width="7" height="7" fill="#000"/>
+          <rect x="42" y="42" width="7" height="7" fill="#000"/><rect x="52" y="42" width="7" height="7" fill="#000"/>
+          <rect x="62" y="42" width="7" height="7" fill="#000"/><rect x="72" y="42" width="7" height="7" fill="#000"/>
+          <rect x="42" y="52" width="7" height="7" fill="#000"/>
+          <rect x="55" y="55" width="7" height="7" fill="#000"/>
+          <rect x="65" y="52" width="7" height="7" fill="#000"/>
+          <rect x="78" y="55" width="7" height="7" fill="#000"/>
+          <rect x="88" y="42" width="7" height="7" fill="#000"/>
+          <rect x="42" y="62" width="7" height="7" fill="#000"/>
+          <rect x="42" y="72" width="7" height="7" fill="#000"/>
+          <rect x="52" y="68" width="7" height="7" fill="#000"/>
+          <rect x="62" y="62" width="7" height="7" fill="#000"/>
+          <rect x="72" y="72" width="7" height="7" fill="#000"/>
+          <rect x="82" y="62" width="7" height="7" fill="#000"/>
+          <rect x="88" y="75" width="7" height="7" fill="#000"/>
+          <rect x="42" y="85" width="7" height="7" fill="#000"/>
+          <rect x="55" y="88" width="7" height="7" fill="#000"/>
+          <rect x="68" y="85" width="7" height="7" fill="#000"/>
+          <rect x="80" y="88" width="7" height="7" fill="#000"/>
+          <!-- FinLend label -->
+          <text x="50" y="96" text-anchor="middle" font-family="Arial" font-size="4.5" font-weight="bold" fill="#333">FINLEND · UPI</text>
+        </svg>
+        <div class="qr-label">Scan &amp; Pay via any UPI App</div>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="detail-grid" id="detailGrid">
+      <div class="det"><div class="det-l">Loan ID</div><div class="det-v" id="d-loanId">—</div></div>
+      <div class="det"><div class="det-l">EMI No.</div><div class="det-v" id="d-emiNo">—</div></div>
+      <div class="det"><div class="det-l">Tenure</div><div class="det-v" id="d-tenure">—</div></div>
+      <div class="det"><div class="det-l">Remaining</div><div class="det-v" id="d-remaining">—</div></div>
+    </div>
+
+    <!-- Extra payment -->
+    <div class="extra-box">
+      <div class="extra-title">Pay Extra Amount (Reduces Principal)</div>
+      <div class="extra-input-row">
+        <input type="number" id="extraAmt" placeholder="Enter extra amount (optional)" min="0" oninput="calcTotal()"/>
+        <button class="btn btn-ghost" onclick="calcTotal()">CALCULATE</button>
+      </div>
+      <div class="extra-info" id="extraInfo"></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goBack()">← BACK</button>
+      <button class="btn btn-gold" id="btnPay" onclick="processPayment()">CONFIRM & PAY</button>
+    </div>
+  </div>
+
+  <!-- Success Overlay -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Payment Successful!</div>
+    <div class="success-amount" id="successAmt">₹—</div>
+    <div class="success-sub" id="successSub">EMI #— recorded<br>Credit score +5</div>
+    <button class="btn btn-gold" style="padding:12px 32px;margin-top:8px" onclick="goBack()">RETURN TO DASHBOARD</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, addDoc, collection, increment }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const cfg = {
+  apiKey:"AIzaSyBMlCi_SXUytX64JzIxA_WpQGFIsAXQjtU",
+  authDomain:"finlend-b7737.firebaseapp.com",
+  projectId:"finlend-b7737",
+  storageBucket:"finlend-b7737.firebasestorage.app",
+  messagingSenderId:"600903478672",
+  appId:"1:600903478672:web:5714e65c3b10c0c998d715"
+};
+const app  = initializeApp(cfg);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+let currentUser = null;
+let loanData    = null;
+let loanId      = null;
+let timerSec    = 300;
+let timerInt    = null;
+
+// Get loanId from URL
+const params = new URLSearchParams(window.location.search);
+loanId = params.get('loan');
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = '../auth.html'; return; }
+  currentUser = user;
+  if (loanId) await loadLoan();
+  else { showToast('No loan specified','err'); }
+});
+
+async function loadLoan() {
+  const snap = await getDoc(doc(db,'loanApplications',loanId));
+  if (!snap.exists()) { showToast('Loan not found','err'); return; }
+  loanData = { id: snap.id, ...snap.data() };
+  renderLoanInfo();
+  startTimer();
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('en-IN'); }
+
+function renderLoanInfo() {
+  const l = loanData;
+  const emiNo = (l.emisPaid||0)+1;
+  document.getElementById('emiLoanId').textContent    = l.loanId||loanId.slice(0,8).toUpperCase();
+  document.getElementById('emiMonthLabel').textContent = `EMI #${emiNo} of ${l.tenure}`;
+  document.getElementById('emiAmountDisplay').textContent = '₹'+fmt(l.emi||0);
+  document.getElementById('emiAmountSub').textContent     = `EMI #${emiNo} · ${l.interestRate}% p.a.`;
+  document.getElementById('d-loanId').textContent    = l.loanId||'—';
+  document.getElementById('d-emiNo').textContent     = `${emiNo} / ${l.tenure}`;
+  document.getElementById('d-tenure').textContent    = `${l.tenure} Months`;
+  document.getElementById('d-remaining').textContent = '₹'+fmt(Math.max(0,(l.remainingAmount||l.loanAmount)-(l.totalPaid||0)));
+}
+
+window.calcTotal = function() {
+  if (!loanData) return;
+  const extra = parseFloat(document.getElementById('extraAmt').value)||0;
+  const info  = document.getElementById('extraInfo');
+  if (extra > 0) {
+    const total  = (loanData.emi||0) + extra;
+    const newRem = Math.max(0,(loanData.remainingAmount||loanData.loanAmount)-(loanData.totalPaid||0)-extra);
+    info.style.display = 'block';
+    info.textContent   = `Total to pay: ₹${fmt(total)} · New remaining principal: ₹${fmt(newRem)}`;
+  } else {
+    info.style.display = 'none';
+  }
+};
+
+function startTimer() {
+  timerSec = 300;
+  timerInt = setInterval(() => {
+    timerSec--;
+    const m = String(Math.floor(timerSec/60)).padStart(2,'0');
+    const s = String(timerSec%60).padStart(2,'0');
+    document.getElementById('timerDisplay').textContent = m+':'+s;
+    document.getElementById('timerFill').style.width = (timerSec/300*100)+'%';
+    const pct = timerSec/300;
+    document.getElementById('timerDisplay').style.color = pct>0.4?'var(--amber)':'var(--red)';
+    if (timerSec <= 0) {
+      clearInterval(timerInt);
+      showToast('Session expired','err');
+      setTimeout(goBack, 2000);
+    }
+  }, 1000);
+}
+
+window.processPayment = async function() {
+  if (!loanData || !currentUser) return;
+  const btn   = document.getElementById('btnPay');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>PROCESSING…';
+
+  const extra  = parseFloat(document.getElementById('extraAmt').value)||0;
+  const emiAmt = loanData.emi||0;
+  const total  = emiAmt + extra;
+
+  try {
+    const snap   = await getDoc(doc(db,'loanApplications',loanId));
+    const d      = snap.data();
+    const emiNo  = (d.emisPaid||0)+1;
+    const history= d.emiHistory||[];
+    const paid   = (d.totalPaid||0)+total;
+    const rem    = Math.max(0,(d.remainingAmount||d.loanAmount)-total);
+    const now    = new Date();
+
+    history.push({ emiNo, amount:emiAmt, paidAt:now.toISOString(), status:'paid', type:'emi' });
+    if (extra>0) history.push({ emiNo, amount:extra, paidAt:now.toISOString(), status:'paid', type:'extra' });
+
+    const nextDue = new Date(now); nextDue.setMonth(nextDue.getMonth()+1);
+
+    await updateDoc(doc(db,'loanApplications',loanId), {
+      emisPaid: emiNo, totalPaid:paid, remainingAmount:rem,
+      emiHistory:history,
+      nextDue:nextDue.toLocaleDateString('en-IN'),
+      status: emiNo>=d.tenure?'completed':'active'
+    });
+
+    await updateDoc(doc(db,'users',currentUser.uid), { creditScore: increment(5) });
+
+    clearInterval(timerInt);
+    document.getElementById('successAmt').textContent = '₹'+fmt(total);
+    document.getElementById('successSub').innerHTML   = `EMI #${emiNo} recorded<br>Credit Score +5 🎉`;
+    document.getElementById('successOverlay').classList.add('show');
+  } catch(e) {
+    btn.disabled=false; btn.textContent='CONFIRM & PAY';
+    showToast('Payment failed: '+e.message,'err');
+  }
+};
+
+window.goBack = function() { window.location.href = 'home.html'; };
+
+window.showToast = function(msg, type='ok') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3500);
+};
+</script>
+</body>
+</html>

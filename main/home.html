@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FinLend — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07091a;--bg2:#0b0f24;--card:#0d1228;--card2:#101526;--field:#111627;
+  --royal:#1a237e;--gold:#c9a84c;--gold2:#ddb96a;--gold-dim:rgba(201,168,76,.5);
+  --gold-faint:rgba(201,168,76,.12);--ivory:#f5f0e8;--muted:rgba(255,255,255,.38);
+  --border:rgba(201,168,76,.15);--border2:rgba(255,255,255,.07);
+  --green:#6fbf7a;--red:#e07070;--amber:#ffb74d;--blue:#5c8fe8;
+  --sidebar:220px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'Raleway',sans-serif;color:var(--ivory);display:flex}
+
+/* ═══════════ SCROLLBAR ═══════════ */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2);border-radius:2px}
+
+/* ═══════════ SIDEBAR ═══════════ */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:linear-gradient(180deg,#0d1432 0%,#080c1e 100%);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  height:100vh;overflow:hidden;
+  position:relative;z-index:100;
+}
+.sidebar::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 120% 40% at 50% 0%,rgba(26,35,126,.4) 0%,transparent 60%);
+  pointer-events:none;
+}
+.sb-brand{
+  padding:24px 20px 20px;
+  border-bottom:1px solid var(--border);
+  position:relative;
+}
+.sb-logo{
+  font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;
+  color:var(--gold);letter-spacing:.1em;
+}
+.sb-logo span{font-size:.62rem;letter-spacing:.2em;color:var(--gold-dim);display:block;margin-top:2px}
+.sb-nav{flex:1;padding:16px 0;overflow-y:auto}
+.nav-section{
+  font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(201,168,76,.3);padding:12px 20px 6px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 20px;cursor:pointer;
+  font-size:.82rem;font-weight:500;letter-spacing:.04em;
+  color:var(--muted);transition:all .2s;position:relative;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.6;transition:opacity .2s}
+.nav-item:hover{color:var(--ivory);background:rgba(255,255,255,.04)}
+.nav-item:hover svg{opacity:1}
+.nav-item.active{color:var(--gold);background:var(--gold-faint)}
+.nav-item.active::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold);
+}
+.nav-item.active svg{opacity:1}
+.nav-badge{
+  margin-left:auto;background:var(--gold);color:#07091a;
+  font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:10px;
+}
+.sb-user{
+  padding:16px 20px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  transition:background .2s;
+}
+.sb-user:hover{background:rgba(255,255,255,.04)}
+.sb-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--royal),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:.75rem;font-weight:700;
+  color:#fff;flex-shrink:0;overflow:hidden;
+}
+.sb-uname{font-size:.8rem;font-weight:600;color:var(--ivory);line-height:1.2}
+.sb-uid{font-size:.65rem;color:var(--gold-dim);letter-spacing:.06em}
+
+/* ═══════════ MAIN ═══════════ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.topbar{
+  height:56px;flex-shrink:0;
+  background:rgba(13,18,40,.95);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+}
+.topbar-title{font-family:'Cinzel',serif;font-size:1rem;font-weight:600;color:var(--ivory);letter-spacing:.06em}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.topbar-btn{
+  padding:7px 16px;border-radius:4px;font-family:'Cinzel',serif;
+  font-size:.7rem;font-weight:600;letter-spacing:.12em;cursor:pointer;
+  border:1px solid var(--border);background:var(--gold-faint);
+  color:var(--gold);transition:all .2s;
+}
+.topbar-btn:hover{background:rgba(201,168,76,.2);border-color:var(--gold-dim)}
+.topbar-btn.primary{background:linear-gradient(135deg,#b8933e,#ddb96a);color:#07091a;border:none}
+.topbar-btn.primary:hover{opacity:.9}
+
+.content{flex:1;overflow-y:auto;padding:24px 28px}
+
+/* ═══════════ SECTIONS ═══════════ */
+.section{display:none}
+.section.active{display:block}
+
+/* ═══════════ CARDS ═══════════ */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:6px;
+  padding:18px 20px;position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:.5;
+}
+.stat-label{font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:8px}
+.stat-val{font-family:'Cinzel',serif;font-size:1.6rem;font-weight:600;color:var(--ivory);line-height:1}
+.stat-sub{font-size:.72rem;color:var(--muted);margin-top:5px;font-family:'Cormorant Garamond',serif;font-style:italic}
+.stat-icon{position:absolute;right:16px;top:16px;opacity:.12;font-size:2rem}
+
+/* credit score ring */
+.score-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:18px 20px;display:flex;align-items:center;gap:20px}
+.score-ring{position:relative;width:80px;height:80px;flex-shrink:0}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring-val{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:1.1rem;font-weight:700;color:var(--gold);line-height:1
+}
+.score-ring-val span{font-size:.5rem;color:var(--gold-dim);letter-spacing:.1em;margin-top:2px}
+
+/* panel cards */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.panel-head{
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title{font-family:'Cinzel',serif;font-size:.85rem;font-weight:600;letter-spacing:.08em;color:var(--ivory)}
+.panel-body{padding:20px}
+
+/* ═══════════ TABLES ═══════════ */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{
+  font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold-dim);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;
+}
+.tbl td{font-size:.82rem;color:rgba(255,255,255,.7);padding:10px 12px;border-bottom:1px solid var(--border2)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.tbl td .amount{font-family:'Cinzel',serif;color:var(--ivory)}
+
+/* ═══════════ BADGES ═══════════ */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.08em}
+.badge.green{background:rgba(111,191,122,.12);color:var(--green);border:1px solid rgba(111,191,122,.25)}
+.badge.red{background:rgba(224,112,112,.12);color:var(--red);border:1px solid rgba(224,112,112,.25)}
+.badge.amber{background:rgba(255,183,77,.12);color:var(--amber);border:1px solid rgba(255,183,77,.25)}
+.badge.blue{background:rgba(92,143,232,.12);color:var(--blue);border:1px solid rgba(92,143,232,.25)}
+.badge.gold{background:var(--gold-faint);color:var(--gold);border:1px solid var(--border)}
+
+/* ═══════════ BUTTONS ═══════════ */
+.btn{
+  padding:8px 18px;border-radius:4px;font-family:'Cinzel',serif;
+  font-size:.7rem;font-weight:600;letter-spacing:.12em;cursor:pointer;
+  border:none;transition:all .2s;
+}
+.btn-gold{background:linear-gradient(135deg,#b8933e,#ddb96a);color:#07091a}
+.btn-gold:hover{opacity:.88;transform:translateY(-1px)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--gold-dim);color:var(--ivory)}
+.btn-red{background:rgba(224,112,112,.15);border:1px solid rgba(224,112,112,.3);color:var(--red)}
+.btn-green{background:rgba(111,191,122,.15);border:1px solid rgba(111,191,122,.3);color:var(--green)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+
+/* ═══════════ FORM FIELDS ═══════════ */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid.single{grid-template-columns:1fr}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:.64rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-dim)}
+.fg input,.fg select,.fg textarea{
+  padding:10px 13px;background:var(--field);border:1px solid var(--border2);
+  border-radius:4px;color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.87rem;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,.15)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{
+  border-color:rgba(201,168,76,.45);box-shadow:0 0 0 3px rgba(201,168,76,.06);
+}
+.fg select option{background:#0d1228}
+.fg textarea{resize:vertical;min-height:70px}
+.fg .err{font-size:.7rem;color:var(--red);font-family:'Cormorant Garamond',serif;font-style:italic;display:none}
+.fg .err.show{display:block}
+
+/* ═══════════ LOAN APPLICATION STEPS ═══════════ */
+.step-bar{display:flex;align-items:center;margin-bottom:24px;gap:0}
+.step-dot{
+  width:28px;height:28px;border-radius:50%;
+  border:1.5px solid rgba(201,168,76,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:.68rem;color:rgba(201,168,76,.3);
+  flex-shrink:0;transition:all .3s;
+}
+.step-dot.on{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.1)}
+.step-dot.done{border-color:var(--gold);background:var(--gold);color:#07091a}
+.step-line{flex:1;height:1px;background:rgba(201,168,76,.1);transition:background .3s}
+.step-line.done{background:rgba(201,168,76,.4)}
+.step-panel{display:none}
+.step-panel.active{display:block}
+
+/* ═══════════ EMI PROGRESS ═══════════ */
+.emi-bar{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin:6px 0}
+.emi-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .6s ease}
+
+/* ═══════════ CHAT ═══════════ */
+.chat-wrap{display:flex;flex-direction:column;height:400px;background:var(--card2);border-radius:6px;border:1px solid var(--border);overflow:hidden}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{max-width:70%;padding:10px 14px;border-radius:6px;font-size:.84rem;line-height:1.5}
+.chat-msg.mine{align-self:flex-end;background:rgba(201,168,76,.12);border:1px solid var(--border);color:var(--ivory)}
+.chat-msg.theirs{align-self:flex-start;background:rgba(26,35,126,.3);border:1px solid rgba(92,143,232,.2);color:rgba(255,255,255,.8)}
+.chat-msg .msg-who{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;opacity:.6}
+.chat-msg .msg-time{font-size:.62rem;opacity:.4;margin-top:3px;text-align:right;font-family:'Cormorant Garamond',serif;font-style:italic}
+.chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+.chat-input{flex:1;padding:9px 13px;background:var(--field);border:1px solid var(--border2);border-radius:4px;color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.85rem;outline:none}
+.chat-input:focus{border-color:rgba(201,168,76,.4)}
+
+/* ═══════════ PROFILE ═══════════ */
+.profile-grid{display:grid;grid-template-columns:280px 1fr;gap:20px}
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.p-avatar{
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(135deg,var(--royal),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:1.4rem;font-weight:700;color:#fff;
+  border:2px solid var(--gold-dim);margin-bottom:4px;overflow:hidden;
+}
+.p-name{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:600;color:var(--ivory)}
+.p-uid{font-size:.72rem;color:var(--gold);letter-spacing:.12em;font-family:'Cormorant Garamond',serif;font-style:italic}
+.p-email{font-size:.78rem;color:var(--muted)}
+
+/* KYC */
+.kyc-box{background:var(--field);border:1px solid var(--border);border-radius:6px;padding:16px;margin-top:8px;width:100%}
+.kyc-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.kyc-lbl{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-dim)}
+.upload-btn{
+  display:flex;align-items:center;gap:6px;padding:7px 14px;
+  background:var(--gold-faint);border:1px dashed var(--border);border-radius:4px;
+  color:var(--gold-dim);font-size:.75rem;font-weight:600;letter-spacing:.08em;
+  cursor:pointer;transition:all .2s;
+}
+.upload-btn:hover{background:rgba(201,168,76,.18);border-color:var(--gold-dim);color:var(--gold)}
+.upload-btn input{display:none}
+.upload-preview{width:100%;height:80px;object-fit:cover;border-radius:3px;margin-top:6px;display:none;border:1px solid var(--border)}
+
+/* ═══════════ MODAL ═══════════ */
+.modal-bg{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{
+  background:#0d1228;border:1px solid rgba(201,168,76,.25);border-radius:6px;
+  padding:32px 28px;width:min(480px,94vw);
+  box-shadow:0 24px 64px rgba(0,0,0,.7);
+  transform:scale(.95) translateY(10px);transition:transform .3s;max-height:90vh;overflow-y:auto;
+}
+.modal-bg.open .modal{transform:scale(1) translateY(0)}
+.modal-title{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);letter-spacing:.06em;margin-bottom:4px}
+.modal-sub{font-family:'Cormorant Garamond',serif;font-style:italic;color:rgba(255,255,255,.38);font-size:.88rem;margin-bottom:20px}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+
+/* ═══════════ TOAST ═══════════ */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:rgba(13,18,40,.97);border-radius:40px;
+  padding:10px 22px;font-size:.8rem;letter-spacing:.04em;
+  opacity:0;pointer-events:none;transition:all .3s;z-index:9999;
+  white-space:nowrap;font-family:'Raleway',sans-serif;
+  display:flex;align-items:center;gap:8px;
+}
+.toast::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.toast.err::before{background:var(--red)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border:1px solid rgba(111,191,122,.3);color:#a8e4b0}
+.toast.err{border:1px solid rgba(224,112,112,.3);color:#f0a8a8}
+.toast.info{border:1px solid var(--border);color:var(--ivory)}
+.toast.info::before{background:var(--gold)}
+
+/* spinner */
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--gold);border-radius:50%;animation:sp .55s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ═══════════ LOAN CARD ═══════════ */
+.loan-card{
+  background:var(--card2);border:1px solid var(--border);border-radius:6px;
+  padding:18px 20px;margin-bottom:14px;position:relative;overflow:hidden;
+}
+.loan-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--gold),var(--gold2));
+}
+.loan-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.loan-id{font-family:'Cinzel',serif;font-size:.82rem;color:var(--gold);letter-spacing:.08em}
+.loan-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.lm-item .lm-l{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:2px}
+.lm-item .lm-v{font-size:.88rem;color:var(--ivory);font-family:'Cinzel',serif}
+
+/* ═══════════ SECTION HEADER ═══════════ */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.sec-title{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:600;color:var(--ivory);letter-spacing:.06em}
+.sec-title span{font-size:.72rem;color:var(--gold-dim);font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;margin-left:8px}
+
+/* ═══════════ CALC BOX ═══════════ */
+.calc-box{background:var(--gold-faint);border:1px solid var(--border);border-radius:6px;padding:16px 20px;margin-top:14px}
+.calc-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:.84rem}
+.calc-row .cl{color:var(--muted)}
+.calc-row .cv{font-family:'Cinzel',serif;color:var(--ivory)}
+.calc-row.total .cl{color:var(--gold);font-weight:700}
+.calc-row.total .cv{color:var(--gold);font-size:1rem}
+
+/* ═══════════ EMPTY STATE ═══════════ */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:10px;opacity:.3}
+.empty-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem}
+
+/* ═══════════ FILE UPLOAD ZONE ═══════════ */
+.file-zone{
+  border:1.5px dashed rgba(201,168,76,.25);border-radius:6px;
+  padding:16px;text-align:center;cursor:pointer;
+  transition:all .2s;background:rgba(201,168,76,.03);
+}
+.file-zone:hover{border-color:var(--gold-dim);background:rgba(201,168,76,.07)}
+.file-zone input{display:none}
+.file-zone .fz-text{font-size:.8rem;color:var(--muted);margin-top:6px}
+.file-name{font-size:.75rem;color:var(--green);margin-top:6px}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media(max-width:900px){
+  .sidebar{position:fixed;left:-220px;transition:left .3s;z-index:200}
+  .sidebar.open{left:0}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .profile-grid{grid-template-columns:1fr}
+  .loan-meta{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .stat-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .content{padding:16px}
+}
+
+/* Background */
+.main::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%,rgba(26,35,126,.35) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 90%,rgba(26,35,126,.25) 0%,transparent 55%),
+    linear-gradient(180deg,#07091a 0%,#0b0f24 100%);
+}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.full-col{grid-column:1/-1}
+
+.pay-extra-input{display:flex;gap:8px;margin-top:10px;align-items:center}
+
+/* ═══════════ NOTIFICATION CARDS ═══════════ */
+.notif-card{
+  background:var(--card2);border:1px solid var(--border);border-radius:6px;
+  padding:18px 20px;margin-bottom:12px;position:relative;overflow:hidden;
+  transition:border-color .2s;
+}
+.notif-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--amber);
+}
+.notif-card.approved::before{background:var(--green)}
+.notif-card.rejected::before{background:var(--red)}
+.notif-card.read{opacity:.55}
+.notif-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.notif-who{font-family:'Cinzel',serif;font-size:.82rem;color:var(--gold);letter-spacing:.05em}
+.notif-time{font-size:.68rem;color:var(--muted);font-family:'Cormorant Garamond',serif;font-style:italic;flex-shrink:0;margin-left:10px}
+.notif-body{font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:12px}
+.notif-details{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  background:rgba(201,168,76,.05);border:1px solid var(--border);
+  border-radius:5px;padding:10px 14px;margin-bottom:12px;
+}
+.nd-item .nd-l{font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:2px}
+.nd-item .nd-v{font-family:'Cinzel',serif;font-size:.82rem;color:var(--ivory)}
+.notif-actions{display:flex;gap:8px}
+.pay-extra-input input{flex:1;padding:8px 12px;background:var(--field);border:1px solid var(--border2);border-radius:4px;color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.85rem;outline:none}
+.pay-extra-input input:focus{border-color:rgba(201,168,76,.4)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ SIDEBAR ═══════════════════════════════════ -->
+<div class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">FinLend <span>Member Portal</span></div>
+  </div>
+  <div class="sb-nav">
+    <div class="nav-section">Overview</div>
+    <button class="nav-item active" onclick="showSection('dashboard')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="showSection('myloans')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+      My Loans
+    </button>
+    <button class="nav-item" onclick="showSection('apply')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      Apply for Loan
+    </button>
+    <button class="nav-item" onclick="showSection('emi')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+      EMI Payments
+    </button>
+    <div class="nav-section">Communication</div>
+    <button class="nav-item" onclick="showSection('chat')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      Chat with Admin
+      <span class="nav-badge" id="chatBadge" style="display:none">!</span>
+    </button>
+    <button class="nav-item" onclick="showSection('notifications')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+      Notifications
+      <span class="nav-badge" id="notifBadge" style="display:none">0</span>
+    </button>
+    <div class="nav-section">Account</div>
+    <button class="nav-item" onclick="showSection('profile')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Profile & KYC
+    </button>
+  </div>
+  <div class="sb-user" onclick="showSection('profile')">
+    <div class="sb-avatar" id="sbAvatar">?</div>
+    <div>
+      <div class="sb-uname" id="sbName">Loading…</div>
+      <div class="sb-uid" id="sbUid">USR----</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MAIN ═══════════════════════════════════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div class="topbar-right">
+      <button class="topbar-btn primary" onclick="showSection('apply')">+ Apply for Loan</button>
+      <button class="topbar-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="section active" id="sec-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Loans Taken</div>
+          <div class="stat-val" id="st-totalLoans">₹0</div>
+          <div class="stat-sub" id="st-loanCount">0 active loans</div>
+          <div class="stat-icon">🏦</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">EMI This Month</div>
+          <div class="stat-val" id="st-monthEmi">₹0</div>
+          <div class="stat-sub" id="st-emiCount">0 EMIs due</div>
+          <div class="stat-icon">📅</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Repaid</div>
+          <div class="stat-val" id="st-repaid">₹0</div>
+          <div class="stat-sub">Principal + Interest paid</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="score-card">
+          <div class="score-ring">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(201,168,76,.1)" stroke-width="6"/>
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--gold)" stroke-width="6"
+                stroke-dasharray="201" stroke-dashoffset="201"
+                stroke-linecap="round" id="scoreArc" style="transition:stroke-dashoffset 1s ease"/>
+            </svg>
+            <div class="score-ring-val"><span id="scoreVal">650</span><span>SCORE</span></div>
+          </div>
+          <div>
+            <div class="stat-label">Credit Score</div>
+            <div id="scoreLabel" style="font-size:.8rem;color:var(--amber);margin-top:4px">Fair</div>
+            <div style="font-size:.7rem;color:var(--muted);margin-top:4px;font-family:'Cormorant Garamond',serif;font-style:italic">Range: 300 – 900</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-bottom:20px">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Running Loans</div>
+            <button class="btn btn-ghost" style="padding:5px 12px;font-size:.65rem" onclick="showSection('myloans')">View All</button>
+          </div>
+          <div class="panel-body" id="dashRunningLoans">
+            <div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No active loans</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Recent EMI Activity</div></div>
+          <div class="panel-body" id="dashEmiActivity">
+            <div class="empty"><div class="empty-icon">💳</div><div class="empty-text">No EMI records yet</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MY LOANS ═══ -->
+    <div class="section" id="sec-myloans">
+      <div class="sec-header">
+        <div class="sec-title">My Loans <span>All loan applications & active loans</span></div>
+      </div>
+      <div id="loansContainer">
+        <div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No loan applications yet</div></div>
+      </div>
+    </div>
+
+    <!-- ═══ APPLY FOR LOAN ═══ -->
+    <div class="section" id="sec-apply">
+      <div class="sec-header">
+        <div class="sec-title">Apply for Loan</div>
+      </div>
+
+      <!-- KYC warning -->
+      <div id="kycWarning" style="display:none;background:rgba(255,183,77,.08);border:1px solid rgba(255,183,77,.3);border-radius:6px;padding:14px 18px;margin-bottom:20px;font-size:.85rem;color:var(--amber)">
+        ⚠️ Your KYC is not yet verified. Please complete your KYC under Profile before applying.
+      </div>
+      <!-- Existing loan warning -->
+      <div id="existingLoanWarning" style="display:none;background:rgba(224,112,112,.08);border:1px solid rgba(224,112,112,.3);border-radius:6px;padding:14px 18px;margin-bottom:20px;font-size:.85rem;color:var(--red)">
+        ❌ You already have an active or pending loan application. You can only have one loan at a time.
+      </div>
+
+      <div class="step-bar">
+        <div class="step-dot on" id="ap-d1">1</div>
+        <div class="step-line" id="ap-l1"></div>
+        <div class="step-dot" id="ap-d2">2</div>
+        <div class="step-line" id="ap-l2"></div>
+        <div class="step-dot" id="ap-d3">3</div>
+        <div class="step-line" id="ap-l3"></div>
+        <div class="step-dot" id="ap-d4">4</div>
+      </div>
+
+      <!-- Step 1: Loan Details -->
+      <div class="step-panel active" id="ap-s1">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Step 1 — Loan Details</div></div>
+          <div class="panel-body">
+            <div class="form-grid">
+              <div class="fg">
+                <label>Loan Amount (₹)</label>
+                <input type="number" id="ap-amount" placeholder="e.g. 50000" min="5000" max="500000" oninput="calcEMI()"/>
+                <div class="err" id="ap-amountErr">Enter a valid amount (₹5,000–₹5,00,000)</div>
+              </div>
+              <div class="fg">
+                <label>Tenure (Months)</label>
+                <select id="ap-tenure" onchange="calcEMI()">
+                  <option value="">Select tenure</option>
+                  <option value="6">6 Months</option>
+                  <option value="12">12 Months (1 Year)</option>
+                  <option value="24">24 Months (2 Years)</option>
+                  <option value="36">36 Months (3 Years)</option>
+                  <option value="48">48 Months (4 Years)</option>
+                  <option value="60">60 Months (5 Years)</option>
+                </select>
+                <div class="err" id="ap-tenureErr">Select a tenure</div>
+              </div>
+              <div class="fg">
+                <label>Loan Purpose</label>
+                <select id="ap-purpose">
+                  <option value="">Select purpose</option>
+                  <option>Home Renovation</option>
+                  <option>Medical Emergency</option>
+                  <option>Education</option>
+                  <option>Business Expansion</option>
+                  <option>Vehicle Purchase</option>
+                  <option>Wedding</option>
+                  <option>Debt Consolidation</option>
+                  <option>Other</option>
+                </select>
+                <div class="err" id="ap-purposeErr">Select a purpose</div>
+              </div>
+              <div class="fg">
+                <label>Employment Type</label>
+                <select id="ap-employment">
+                  <option value="">Select type</option>
+                  <option>Salaried</option>
+                  <option>Self-Employed</option>
+                  <option>Business Owner</option>
+                  <option>Freelancer</option>
+                  <option>Student</option>
+                </select>
+                <div class="err" id="ap-empErr">Select employment type</div>
+              </div>
+              <div class="fg">
+                <label>Monthly Income (₹)</label>
+                <input type="number" id="ap-income" placeholder="e.g. 30000" min="0"/>
+                <div class="err" id="ap-incomeErr">Enter your monthly income</div>
+              </div>
+            </div>
+
+            <!-- EMI Calculator -->
+            <div class="calc-box" id="emiCalcBox" style="display:none">
+              <div style="font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold);letter-spacing:.1em;margin-bottom:10px">EMI CALCULATION</div>
+              <div class="calc-row"><span class="cl">Principal Amount</span><span class="cv" id="c-principal">—</span></div>
+              <div class="calc-row"><span class="cl">Interest Rate</span><span class="cv" id="c-rate">—</span></div>
+              <div class="calc-row"><span class="cl">Total Interest</span><span class="cv" id="c-interest">—</span></div>
+              <div class="calc-row"><span class="cl">Monthly EMI</span><span class="cv" id="c-emi">—</span></div>
+              <div class="calc-row total"><span class="cl">Total Payable</span><span class="cv" id="c-total">—</span></div>
+            </div>
+
+            <div style="margin-top:18px;text-align:right">
+              <button class="btn btn-gold" onclick="applyStep(2)">NEXT →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Documents -->
+      <div class="step-panel" id="ap-s2">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Step 2 — Document Upload</div></div>
+          <div class="panel-body">
+            <div class="form-grid">
+              <div class="fg">
+                <label>Salary Slip / Proof of Income</label>
+                <div class="file-zone" onclick="document.getElementById('doc-salary').click()">
+                  <svg width="24" height="24" fill="rgba(201,168,76,.4)" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+                  <div class="fz-text">Click to upload salary slip (JPG/PNG images only)</div>
+                  <input type="file" id="doc-salary" accept="image/jpeg,image/jpg,image/png" onchange="previewFile(this,'salary-name')"/>
+                </div>
+                <div class="file-name" id="salary-name"></div>
+                <div class="err" id="ap-salaryErr">Please upload salary proof</div>
+              </div>
+              <div class="fg">
+                <label>Additional Document (Optional)</label>
+                <div class="file-zone" onclick="document.getElementById('doc-extra').click()">
+                  <svg width="24" height="24" fill="rgba(201,168,76,.4)" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+                  <div class="fz-text">Click to upload (optional)</div>
+                  <input type="file" id="doc-extra" accept="image/jpeg,image/jpg,image/png" onchange="previewFile(this,'extra-name')"/>
+                </div>
+                <div class="file-name" id="extra-name"></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+              <button class="btn btn-ghost" onclick="applyStep(1)">← Back</button>
+              <button class="btn btn-gold" onclick="applyStep(3)">NEXT →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Guarantor -->
+      <div class="step-panel" id="ap-s3">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Step 3 — Add Guarantor</div></div>
+          <div class="panel-body">
+            <div class="fg">
+              <label>Guarantor's Unique Member ID</label>
+              <div style="display:flex;gap:10px">
+                <input type="text" id="ap-guarantor" placeholder="e.g. USR1002" style="flex:1;padding:10px 13px;background:var(--field);border:1px solid var(--border2);border-radius:4px;color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.87rem;outline:none"/>
+                <button class="btn btn-ghost" onclick="lookupGuarantor()">VERIFY</button>
+              </div>
+              <div class="err" id="ap-guarantorErr" style="display:block;display:none">Guarantor not found or KYC not completed.</div>
+            </div>
+
+            <!-- Guarantor preview -->
+            <div id="guarantorPreview" style="display:none;margin-top:14px;background:var(--gold-faint);border:1px solid var(--border);border-radius:6px;padding:14px 18px">
+              <div style="font-family:'Cinzel',serif;font-size:.72rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">GUARANTOR FOUND</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div><div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em">Name</div><div id="g-name" style="font-size:.85rem;color:var(--ivory)">—</div></div>
+                <div><div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em">Credit Score</div><div id="g-score" style="font-size:.85rem;color:var(--ivory)">—</div></div>
+                <div><div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em">Member ID</div><div id="g-uid" style="font-size:.85rem;color:var(--gold)">—</div></div>
+                <div><div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em">KYC Status</div><div id="g-kyc" style="font-size:.85rem">—</div></div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+              <button class="btn btn-ghost" onclick="applyStep(2)">← Back</button>
+              <button class="btn btn-gold" onclick="applyStep(4)">REVIEW →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Review & Submit -->
+      <div class="step-panel" id="ap-s4">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Step 4 — Review & Submit</div></div>
+          <div class="panel-body">
+            <div id="ap-review" style="margin-bottom:16px"></div>
+            <div style="background:rgba(255,183,77,.07);border:1px solid rgba(255,183,77,.2);border-radius:6px;padding:12px 16px;font-size:.8rem;color:rgba(255,183,77,.85);margin-bottom:16px">
+              📋 By submitting, a notification will be sent to your guarantor for approval. The loan will proceed to admin review only after guarantor approval.
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end">
+              <button class="btn btn-ghost" onclick="applyStep(3)">← Back</button>
+              <button class="btn btn-gold" id="btnSubmitLoan" onclick="submitLoanApplication()">SUBMIT APPLICATION</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ EMI PAYMENTS ═══ -->
+    <div class="section" id="sec-emi">
+      <div class="sec-header">
+        <div class="sec-title">EMI Payments <span>Manage your repayments</span></div>
+      </div>
+      <div id="emiContainer">
+        <div class="empty"><div class="empty-icon">💳</div><div class="empty-text">No active EMI schedules</div></div>
+      </div>
+    </div>
+
+    <!-- ═══ CHAT ═══ -->
+    <div class="section" id="sec-chat">
+      <div class="sec-header">
+        <div class="sec-title">Chat with Admin <span>Loan negotiation & support</span></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim)">Select Loan</label>
+        <select id="chatLoanSelect" onchange="loadChat(this.value)" style="margin-top:6px;padding:9px 13px;background:var(--field);border:1px solid var(--border2);border-radius:4px;color:var(--ivory);font-family:'Raleway',sans-serif;font-size:.87rem;outline:none;min-width:240px">
+          <option value="">— Select a loan to chat —</option>
+        </select>
+      </div>
+      <div class="chat-wrap" id="chatWrap">
+        <div class="chat-messages" id="chatMessages">
+          <div class="empty" style="margin:auto"><div class="empty-icon">💬</div><div class="empty-text">Select a loan to view chat</div></div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" type="text" id="chatInput" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendChat()"/>
+          <button class="btn btn-gold" onclick="sendChat()">SEND</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ NOTIFICATIONS & GUARANTOR REQUESTS ═══ -->
+    <div class="section" id="sec-notifications">
+      <div class="sec-header">
+        <div class="sec-title">Notifications <span id="notifCountLabel">— guarantor requests & updates</span></div>
+      </div>
+
+      <!-- Guarantor Requests (when someone picks YOU as guarantor) -->
+      <div class="panel" style="margin-bottom:20px">
+        <div class="panel-head">
+          <div class="panel-title">🤝 Guarantor Requests</div>
+          <span class="badge amber" id="pendingGuarantorCount" style="display:none">0 pending</span>
+        </div>
+        <div class="panel-body" id="guarantorRequestsList">
+          <div class="empty"><div class="empty-icon">🤝</div><div class="empty-text">No guarantor requests</div></div>
+        </div>
+      </div>
+
+      <!-- General Notifications (loan status updates) -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">🔔 Loan Status Updates</div>
+        </div>
+        <div class="panel-body" id="loanNotifList">
+          <div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">No notifications yet</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PROFILE & KYC ═══ -->
+    <div class="section" id="sec-profile">
+      <div class="sec-header"><div class="sec-title">Profile & KYC</div></div>
+      <div class="profile-grid">
+
+        <!-- Left: Profile card -->
+        <div>
+          <div class="profile-card">
+            <!-- Profile Photo with circular progress ring -->
+            <div style="position:relative;width:96px;height:96px;margin-bottom:10px;flex-shrink:0">
+              <!-- SVG progress ring -->
+              <svg width="96" height="96" style="position:absolute;top:0;left:0;transform:rotate(-90deg)" id="photoRingSvg">
+                <circle cx="48" cy="48" r="44" fill="none" stroke="rgba(201,168,76,0.15)" stroke-width="3"/>
+                <circle cx="48" cy="48" r="44" fill="none" stroke="var(--gold)" stroke-width="3"
+                  stroke-dasharray="276.46" stroke-dashoffset="276.46"
+                  stroke-linecap="round" id="photoRingArc" style="transition:stroke-dashoffset .15s linear"/>
+              </svg>
+              <!-- Avatar circle -->
+              <div class="p-avatar" id="pAvatar" style="width:82px;height:82px;font-size:1.5rem;position:absolute;top:7px;left:7px;border:none">?</div>
+              <!-- Upload overlay on hover -->
+              <label for="upload-photo" id="photoOverlay"
+                style="position:absolute;top:7px;left:7px;width:82px;height:82px;border-radius:50%;
+                       background:rgba(0,0,0,0);display:flex;flex-direction:column;align-items:center;
+                       justify-content:center;cursor:pointer;transition:background .2s;z-index:2"
+                onmouseenter="this.style.background='rgba(0,0,0,0.55)';document.getElementById('photoOverlayIcon').style.opacity='1'"
+                onmouseleave="this.style.background='rgba(0,0,0,0)';document.getElementById('photoOverlayIcon').style.opacity='0'">
+                <div id="photoOverlayIcon" style="opacity:0;transition:opacity .2s;display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:none">
+                  <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                  <span style="font-size:.55rem;color:white;letter-spacing:.06em;font-weight:700">CHANGE</span>
+                </div>
+                <input type="file" id="upload-photo" accept="image/jpeg,image/jpg,image/png" style="display:none" onchange="uploadProfilePhoto(this)"/>
+              </label>
+              <!-- Gold pencil badge -->
+              <div id="photoBadge" style="position:absolute;bottom:6px;right:6px;width:22px;height:22px;
+                   background:var(--gold);border-radius:50%;display:flex;align-items:center;
+                   justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.5);z-index:3;pointer-events:none">
+                <svg width="11" height="11" fill="#07091a" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+              </div>
+            </div>
+            <!-- Progress text below avatar -->
+            <div id="photoProgress" style="display:none;width:100%;text-align:center;margin-bottom:6px">
+              <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--gold)" id="photoPctText">Uploading… 0%</div>
+              <div style="height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-top:4px;width:80%;margin-left:auto;margin-right:auto">
+                <div id="photoFill" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;width:0%;transition:width .15s linear"></div>
+              </div>
+            </div>
+            <div style="font-size:.62rem;color:var(--muted);margin-bottom:8px;font-family:'Cormorant Garamond',serif;font-style:italic" id="photoHint">Hover to change photo</div>
+            <div class="p-name" id="pName">—</div>
+            <div class="p-uid" id="pUid">USR----</div>
+            <div class="p-email" id="pEmail">—</div>
+            <div style="margin-top:4px"><span class="badge" id="kycBadge">KYC Pending</span></div>
+
+            <!-- KYC Upload -->
+            <div class="kyc-box">
+              <div style="font-family:'Cinzel',serif;font-size:.72rem;color:var(--gold);letter-spacing:.1em;margin-bottom:10px">KYC DOCUMENTS</div>
+
+              <div class="kyc-row">
+                <div class="kyc-lbl">Aadhaar Card</div>
+                <span class="badge" id="aadhaarStatus">Not Uploaded</span>
+              </div>
+              <label class="upload-btn" for="kyc-aadhaar">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                Upload Aadhaar Image (JPG/PNG)
+                <input type="file" id="kyc-aadhaar" accept="image/jpeg,image/jpg,image/png" onchange="uploadKYC(this,'aadhaar')"/>
+              </label>
+              <div id="aadhaarProgress" style="display:none;margin-top:6px">
+                <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--gold-dim);margin-bottom:3px"><span>Uploading…</span><span id="aadhaarPct">0%</span></div>
+                <div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden"><div id="aadhaarFill" style="height:100%;background:var(--gold);border-radius:2px;transition:width .2s"></div></div>
+              </div>
+              <img id="aadhaarPreview" class="upload-preview" alt="Aadhaar Preview"/>
+
+              <div class="kyc-row" style="margin-top:12px">
+                <div class="kyc-lbl">PAN Card</div>
+                <span class="badge" id="panStatus">Not Uploaded</span>
+              </div>
+              <label class="upload-btn" for="kyc-pan">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                Upload PAN Image (JPG/PNG)
+                <input type="file" id="kyc-pan" accept="image/jpeg,image/jpg,image/png" onchange="uploadKYC(this,'pan')"/>
+              </label>
+              <div id="panProgress" style="display:none;margin-top:6px">
+                <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--gold-dim);margin-bottom:3px"><span>Uploading…</span><span id="panPct">0%</span></div>
+                <div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden"><div id="panFill" style="height:100%;background:var(--gold);border-radius:2px;transition:width .2s"></div></div>
+              </div>
+              <img id="panPreview" class="upload-preview" alt="PAN Preview"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Edit profile -->
+        <div>
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">Edit Profile</div></div>
+            <div class="panel-body">
+              <div class="form-grid">
+                <div class="fg">
+                  <label>Full Name</label>
+                  <input type="text" id="edit-name" placeholder="Full Name"/>
+                </div>
+                <div class="fg">
+                  <label>Phone Number</label>
+                  <input type="tel" id="edit-phone" placeholder="+91 98765 43210"/>
+                </div>
+                <div class="fg full">
+                  <label>Residential Address</label>
+                  <input type="text" id="edit-address" placeholder="Full address"/>
+                </div>
+                <div class="fg">
+                  <label>Date of Birth</label>
+                  <input type="date" id="edit-dob"/>
+                </div>
+                <div class="fg">
+                  <label>Email (Read-only)</label>
+                  <input type="email" id="edit-email" readonly style="opacity:.5;cursor:not-allowed"/>
+                </div>
+              </div>
+              <div style="margin-top:18px;text-align:right">
+                <button class="btn btn-gold" onclick="saveProfile()">SAVE CHANGES</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Credit Score History -->
+          <div class="panel" style="margin-top:16px">
+            <div class="panel-head"><div class="panel-title">Credit Score Guide</div></div>
+            <div class="panel-body">
+              <table class="tbl">
+                <tr><th>Event</th><th>Score Change</th></tr>
+                <tr><td>EMI Paid Early</td><td><span class="badge green">+10</span></td></tr>
+                <tr><td>EMI Paid On Time</td><td><span class="badge green">+5</span></td></tr>
+                <tr><td>EMI Paid Late</td><td><span class="badge red">−10</span></td></tr>
+                <tr><td>EMI Default</td><td><span class="badge red">−80</span></td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══════════════ EMI PAY MODAL ═══════════════ -->
+<div class="modal-bg" id="emiModal">
+  <div class="modal">
+    <div class="modal-title">Pay EMI</div>
+    <div class="modal-sub" id="emiModalSub">Loan #LN — Monthly EMI ₹—</div>
+    <div style="background:var(--field);border:1px solid var(--border);border-radius:6px;padding:16px;margin:16px 0;text-align:center">
+      <!-- QR placeholder -->
+      <div style="width:140px;height:140px;background:white;border-radius:6px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;padding:8px">
+        <svg viewBox="0 0 100 100" width="124" height="124">
+          <rect x="0" y="0" width="40" height="40" fill="none" stroke="#000" stroke-width="3"/>
+          <rect x="10" y="10" width="20" height="20" fill="#000"/>
+          <rect x="60" y="0" width="40" height="40" fill="none" stroke="#000" stroke-width="3"/>
+          <rect x="70" y="10" width="20" height="20" fill="#000"/>
+          <rect x="0" y="60" width="40" height="40" fill="none" stroke="#000" stroke-width="3"/>
+          <rect x="10" y="70" width="20" height="20" fill="#000"/>
+          <rect x="55" y="55" width="10" height="10" fill="#000"/>
+          <rect x="70" y="55" width="10" height="10" fill="#000"/>
+          <rect x="85" y="55" width="10" height="10" fill="#000"/>
+          <rect x="55" y="70" width="10" height="10" fill="#000"/>
+          <rect x="55" y="85" width="10" height="10" fill="#000"/>
+          <rect x="70" y="70" width="25" height="10" fill="#000"/>
+          <rect x="85" y="85" width="10" height="10" fill="#000"/>
+        </svg>
+      </div>
+      <div style="font-size:.75rem;color:rgba(0,0,0,.6)">Scan with any UPI app</div>
+    </div>
+    <div style="font-family:'Cinzel',serif;font-size:1.3rem;color:var(--gold);text-align:center;margin-bottom:6px" id="emiModalAmount">₹—</div>
+    <div style="font-size:.75rem;color:var(--muted);text-align:center;margin-bottom:16px">Complete payment within <span id="emiTimer" style="color:var(--amber);font-weight:700">05:00</span></div>
+
+    <!-- Extra payment -->
+    <div style="background:var(--gold-faint);border:1px solid var(--border);border-radius:6px;padding:12px 16px">
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:8px">Pay Extra (Reduces Principal)</div>
+      <div class="pay-extra-input">
+        <input type="number" id="extraPayAmt" placeholder="Enter extra amount (optional)" min="0"/>
+        <button class="btn btn-ghost" onclick="addExtraPayment()" style="white-space:nowrap">ADD</button>
+      </div>
+      <div id="extraPayInfo" style="font-size:.75rem;color:var(--muted);margin-top:6px;display:none"></div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeEmiModal()">CANCEL</button>
+      <button class="btn btn-gold" id="btnConfirmEmi" onclick="confirmEmiPayment()">CONFIRM PAYMENT</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════ FIREBASE ═══════════════════════════ -->
+<script type="module">
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut as fbSignOut, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc,
+  collection, addDoc, query, where, orderBy,
+  getDocs, onSnapshot, serverTimestamp, increment
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const cfg = {
+  apiKey:"AIzaSyBMlCi_SXUytX64JzIxA_WpQGFIsAXQjtU",
+  authDomain:"finlend-b7737.firebaseapp.com",
+  projectId:"finlend-b7737",
+  storageBucket:"finlend-b7737.firebasestorage.app",
+  messagingSenderId:"600903478672",
+  appId:"1:600903478672:web:5714e65c3b10c0c998d715"
+};
+const app  = initializeApp(cfg);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// ── Cloudinary config ──
+const CLOUD_NAME  = 'root'; // as given
+const UPLOAD_PRESET = 'finlend_unsigned'; // create unsigned preset in Cloudinary named this
+
+window._db   = db;
+window._auth = auth;
+let   currentUser = null;
+let   userData    = null;
+let   userLoans   = [];
+let   chatUnsub   = null;
+let   currentChatLoanId = null;
+let   emiTimerInterval  = null;
+let   currentEmiData    = null;
+let   guarantorData     = null;
+
+// ── Auth guard ──
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = '../index.html'; return; }
+  currentUser = user;
+  await loadUserData(user.uid);
+  // Redirect admin away from user panel
+  if (userData && userData.role === 'admin') {
+    window.location.href = 'admin.html'; return;
+  }
+  await loadUserLoans(user.uid);
+  renderDashboard();
+  renderLoans();
+  renderEmiSection();
+  populateChatSelect();
+  // Start real-time notifications listener using Firebase UID
+  window.startNotificationsListener(user.uid);
+  window.renderLoanNotifications();
+});
+
+// ── Load user data ──
+async function loadUserData(uid) {
+  const snap = await getDoc(doc(db,'users',uid));
+  if (snap.exists()) {
+    userData = snap.data();
+    updateUI();
+  }
+}
+
+function updateUI() {
+  if (!userData) return;
+  const initials = (userData.name||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  // Show photo or initials in all avatar elements
+  ['sbAvatar','pAvatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (userData.photoUrl) {
+      el.textContent           = '';
+      el.innerHTML             = '';
+      el.style.backgroundImage    = 'url("' + userData.photoUrl + '")';
+      el.style.backgroundSize     = 'cover';
+      el.style.backgroundPosition = 'center';
+      el.style.backgroundRepeat   = 'no-repeat';
+      el.style.color              = 'transparent';
+    } else {
+      el.textContent           = initials;
+      el.style.backgroundImage = 'none';
+      el.style.color           = '';
+    }
+  });
+  document.getElementById('sbName').textContent    = userData.name || 'User';
+  document.getElementById('sbUid').textContent     = userData.uniqueUserNumber || '—';
+  document.getElementById('pName').textContent     = userData.name || '—';
+  document.getElementById('pUid').textContent      = userData.uniqueUserNumber || '—';
+  document.getElementById('pEmail').textContent    = userData.email || '—';
+  document.getElementById('edit-name').value    = userData.name || '';
+  document.getElementById('edit-phone').value   = userData.phone || '';
+  document.getElementById('edit-address').value = userData.address || '';
+  document.getElementById('edit-dob').value     = userData.dateOfBirth || '';
+  document.getElementById('edit-email').value   = userData.email || '';
+
+  // KYC badge
+  const kycBadge = document.getElementById('kycBadge');
+  const kycStatus = userData.kycStatus || 'pending';
+  kycBadge.textContent = kycStatus === 'verified' ? 'KYC Verified ✓' : kycStatus === 'submitted' ? 'KYC Under Review' : 'KYC Pending';
+  kycBadge.className = 'badge ' + (kycStatus==='verified'?'green':kycStatus==='submitted'?'amber':'red');
+
+  // Aadhaar / PAN status
+  if (userData.aadhaarUrl) {
+    document.getElementById('aadhaarStatus').textContent = 'Uploaded';
+    document.getElementById('aadhaarStatus').className = 'badge amber';
+    const img = document.getElementById('aadhaarPreview');
+    if (!userData.aadhaarUrl.endsWith('.pdf')) { img.src = userData.aadhaarUrl; img.style.display='block'; }
+  }
+  if (userData.panUrl) {
+    document.getElementById('panStatus').textContent = 'Uploaded';
+    document.getElementById('panStatus').className = 'badge amber';
+    const img = document.getElementById('panPreview');
+    if (!userData.panUrl.endsWith('.pdf')) { img.src = userData.panUrl; img.style.display='block'; }
+  }
+
+  // Credit score
+  const score = userData.creditScore || 650;
+  document.getElementById('scoreVal').textContent = score;
+  const arc = document.getElementById('scoreArc');
+  const pct = (score - 300) / 600;
+  arc.style.strokeDashoffset = 201 - (201 * pct);
+  const scoreLbl = score >= 750?'Excellent':score>=700?'Good':score>=650?'Fair':'Poor';
+  const scoreColor = score>=750?'var(--green)':score>=700?'var(--blue)':score>=650?'var(--amber)':'var(--red)';
+  document.getElementById('scoreLabel').textContent = scoreLbl;
+  document.getElementById('scoreLabel').style.color = scoreColor;
+}
+
+// ── Load loans ──
+async function loadUserLoans(uid) {
+  const q = query(collection(db,'loanApplications'), where('borrowerId','==',uid), orderBy('createdAt','desc'));
+  const snap = await getDocs(q);
+  userLoans = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+}
+
+// ── Dashboard render ──
+window.renderDashboard = function() {
+  if (!userData) return;
+  const activeLoans = userLoans.filter(l => l.adminStatus === 'approved');
+  const totalAmt    = activeLoans.reduce((s,l) => s + (l.loanAmount||0), 0);
+  const totalRepaid = activeLoans.reduce((s,l) => s + (l.totalPaid||0), 0);
+
+  // This month EMI
+  const now = new Date();
+  const monthEmi = activeLoans.reduce((s,l) => s + (l.emi||0), 0);
+  const emiCount = activeLoans.length;
+
+  document.getElementById('st-totalLoans').textContent = '₹' + fmt(totalAmt);
+  document.getElementById('st-loanCount').textContent  = activeLoans.length + ' active loan' + (activeLoans.length!==1?'s':'');
+  document.getElementById('st-monthEmi').textContent   = '₹' + fmt(monthEmi);
+  document.getElementById('st-emiCount').textContent   = emiCount + ' EMI' + (emiCount!==1?'s':'') + ' this month';
+  document.getElementById('st-repaid').textContent     = '₹' + fmt(totalRepaid);
+
+  // Running loans widget
+  const rlEl = document.getElementById('dashRunningLoans');
+  if (activeLoans.length === 0) {
+    rlEl.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No active loans</div></div>';
+  } else {
+    rlEl.innerHTML = activeLoans.slice(0,3).map(l => {
+      const paid = l.totalPaid || 0;
+      const total = l.totalPayable || l.loanAmount;
+      const pct = Math.min(100, Math.round(paid/total*100));
+      return `<div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold)">${l.loanId||l.id.slice(0,8).toUpperCase()}</span>
+          <span style="font-size:.75rem;color:var(--muted)">₹${fmt(l.loanAmount)}</span>
+        </div>
+        <div class="emi-bar"><div class="emi-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:3px">${pct}% repaid — EMI ₹${fmt(l.emi||0)}/mo</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Recent EMI activity
+  const emiEl = document.getElementById('dashEmiActivity');
+  const allEmis = userLoans.flatMap(l => (l.emiHistory||[]).map(e=>({...e,loanId:l.loanId||l.id})));
+  allEmis.sort((a,b) => (b.paidAt||'') > (a.paidAt||'') ? 1 : -1);
+  if (allEmis.length === 0) {
+    emiEl.innerHTML = '<div class="empty"><div class="empty-icon">💳</div><div class="empty-text">No EMI records yet</div></div>';
+  } else {
+    emiEl.innerHTML = `<table class="tbl"><thead><tr><th>Loan</th><th>EMI #</th><th>Amount</th><th>Status</th></tr></thead><tbody>` +
+      allEmis.slice(0,5).map(e => `<tr>
+        <td>${e.loanId}</td>
+        <td>#${e.emiNo||'—'}</td>
+        <td class="amount">₹${fmt(e.amount||0)}</td>
+        <td><span class="badge ${e.status==='paid'?'green':'amber'}">${e.status||'pending'}</span></td>
+      </tr>`).join('') + '</tbody></table>';
+  }
+};
+
+// ── Loans section ──
+window.renderLoans = function() {
+  const el = document.getElementById('loansContainer');
+  if (userLoans.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No loan applications yet. <a href="#" onclick="showSection(\'apply\')" style="color:var(--gold)">Apply now →</a></div></div>';
+    return;
+  }
+  el.innerHTML = userLoans.map(l => {
+    const statusClass = l.adminStatus==='approved'?'green':l.adminStatus==='rejected'?'red':l.guarantorStatus==='approved'?'blue':'amber';
+    const statusText  = l.adminStatus==='approved'?'Active':l.adminStatus==='rejected'?'Rejected':l.guarantorStatus==='rejected'?'Rejected by Guarantor':l.guarantorStatus==='approved'?'Pending Admin':'Awaiting Guarantor';
+    const paid  = l.totalPaid||0;
+    const total = l.totalPayable||l.loanAmount||0;
+    const pct   = total>0?Math.min(100,Math.round(paid/total*100)):0;
+    const remaining = Math.max(0,(l.remainingAmount||total)-paid);
+    return `<div class="loan-card">
+      <div class="loan-card-head">
+        <div>
+          <div class="loan-id">${l.loanId||('LN'+l.id.slice(0,6).toUpperCase())}</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:2px">${l.purpose||'—'} · Applied ${l.createdAt?new Date(l.createdAt.seconds?l.createdAt.seconds*1000:l.createdAt).toLocaleDateString('en-IN'):'-'}</div>
+        </div>
+        <span class="badge ${statusClass}">${statusText}</span>
+      </div>
+      <div class="loan-meta">
+        <div class="lm-item"><div class="lm-l">Loan Amount</div><div class="lm-v">₹${fmt(l.loanAmount)}</div></div>
+        <div class="lm-item"><div class="lm-l">Monthly EMI</div><div class="lm-v">₹${fmt(l.emi||0)}</div></div>
+        <div class="lm-item"><div class="lm-l">Interest Rate</div><div class="lm-v">${l.interestRate||'—'}%</div></div>
+        <div class="lm-item"><div class="lm-l">Tenure</div><div class="lm-v">${l.tenure||'—'} Months</div></div>
+        <div class="lm-item"><div class="lm-l">Total Payable</div><div class="lm-v">₹${fmt(l.totalPayable||0)}</div></div>
+        <div class="lm-item"><div class="lm-l">Total Interest</div><div class="lm-v">₹${fmt(l.totalInterest||0)}</div></div>
+        <div class="lm-item"><div class="lm-l">Remaining</div><div class="lm-v" style="color:var(--amber)">₹${fmt(remaining)}</div></div>
+        <div class="lm-item"><div class="lm-l">EMIs Paid</div><div class="lm-v">${l.emisPaid||0}/${l.tenure||0}</div></div>
+      </div>
+      ${l.adminStatus==='approved'?`
+      <div style="margin-bottom:10px">
+        <div style="font-size:.65rem;color:var(--muted);margin-bottom:3px">${pct}% Repaid</div>
+        <div class="emi-bar"><div class="emi-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-gold" onclick="openEmiModal('${l.id}')">PAY EMI</button>
+        <button class="btn btn-ghost" onclick="showSection('chat');setTimeout(()=>{document.getElementById('chatLoanSelect').value='${l.id}';loadChat('${l.id}')},100)">CHAT</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
+};
+
+// ── EMI Section ──
+window.renderEmiSection = function() {
+  const el = document.getElementById('emiContainer');
+  const approved = userLoans.filter(l => l.adminStatus==='approved');
+  if (approved.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">💳</div><div class="empty-text">No active EMI schedules</div></div>';
+    return;
+  }
+  el.innerHTML = approved.map(l => {
+    const history = l.emiHistory || [];
+    const paid    = l.totalPaid || 0;
+    const total   = l.totalPayable || l.loanAmount;
+    const pct     = total>0?Math.min(100,Math.round(paid/total*100)):0;
+    return `<div class="panel" style="margin-bottom:20px">
+      <div class="panel-head">
+        <div class="panel-title">${l.loanId||l.id.slice(0,8).toUpperCase()} — ₹${fmt(l.loanAmount)} at ${l.interestRate}%</div>
+        <button class="btn btn-gold" onclick="openEmiModal('${l.id}')">PAY EMI / EXTRA</button>
+      </div>
+      <div class="panel-body">
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:4px">
+            <span>Repayment Progress</span><span>${pct}% (₹${fmt(paid)} of ₹${fmt(total)})</span>
+          </div>
+          <div class="emi-bar" style="height:8px"><div class="emi-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+          <div><div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em">Monthly EMI</div><div style="font-family:'Cinzel',serif;font-size:.95rem;color:var(--ivory)">₹${fmt(l.emi||0)}</div></div>
+          <div><div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em">EMIs Paid</div><div style="font-family:'Cinzel',serif;font-size:.95rem;color:var(--green)">${l.emisPaid||0}/${l.tenure}</div></div>
+          <div><div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em">Remaining Principal</div><div style="font-family:'Cinzel',serif;font-size:.95rem;color:var(--amber)">₹${fmt(Math.max(0,(l.remainingAmount||l.loanAmount)-(paid||0)))}</div></div>
+          <div><div style="font-size:.6rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.12em">Next Due</div><div style="font-family:'Cinzel',serif;font-size:.95rem;color:var(--ivory)">${l.nextDue||'—'}</div></div>
+        </div>
+        ${history.length>0?`
+        <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold-dim);letter-spacing:.1em;margin-bottom:8px">PAYMENT HISTORY</div>
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>${history.map(e=>`<tr>
+            <td>${e.emiNo||'—'}</td>
+            <td>${e.paidAt?new Date(e.paidAt).toLocaleDateString('en-IN'):'—'}</td>
+            <td class="amount">₹${fmt(e.amount||0)}</td>
+            <td><span class="badge ${e.type==='extra'?'blue':'gold'}">${e.type==='extra'?'Extra':'EMI'}</span></td>
+            <td><span class="badge green">Paid</span></td>
+          </tr>`).join('')}</tbody>
+        </table>`:'<div style="font-size:.8rem;color:var(--muted);font-family:\'Cormorant Garamond\',serif;font-style:italic">No payments made yet.</div>'}
+      </div>
+    </div>`;
+  }).join('');
+};
+
+// ── EMI Modal ──
+window.openEmiModal = function(loanId) {
+  const loan = userLoans.find(l => l.id === loanId);
+  if (!loan) return;
+  currentEmiData = loan;
+  document.getElementById('emiModalSub').textContent    = `${loan.loanId||loanId.slice(0,8).toUpperCase()} — Monthly EMI`;
+  document.getElementById('emiModalAmount').textContent = `₹${fmt(loan.emi||0)}`;
+  document.getElementById('extraPayAmt').value = '';
+  document.getElementById('extraPayInfo').style.display = 'none';
+  document.getElementById('emiModal').classList.add('open');
+  startEmiTimer();
+};
+
+window.closeEmiModal = function() {
+  document.getElementById('emiModal').classList.remove('open');
+  if (emiTimerInterval) { clearInterval(emiTimerInterval); emiTimerInterval = null; }
+};
+
+function startEmiTimer() {
+  let sec = 300;
+  if (emiTimerInterval) clearInterval(emiTimerInterval);
+  emiTimerInterval = setInterval(() => {
+    sec--;
+    const m = String(Math.floor(sec/60)).padStart(2,'0');
+    const s = String(sec%60).padStart(2,'0');
+    document.getElementById('emiTimer').textContent = m+':'+s;
+    if (sec <= 0) { clearInterval(emiTimerInterval); closeEmiModal(); showToast('Payment session expired','err'); }
+  }, 1000);
+}
+
+window.addExtraPayment = function() {
+  const amt = parseFloat(document.getElementById('extraPayAmt').value);
+  if (!amt || amt <= 0) { showToast('Enter a valid extra amount','err'); return; }
+  const info = document.getElementById('extraPayInfo');
+  info.style.display = 'block';
+  info.textContent   = `Extra ₹${fmt(amt)} will reduce your principal. Total to pay: ₹${fmt((currentEmiData?.emi||0)+amt)}`;
+};
+
+window.confirmEmiPayment = async function() {
+  if (!currentEmiData || !currentUser) return;
+  const extra  = parseFloat(document.getElementById('extraPayAmt').value)||0;
+  const emiAmt = currentEmiData.emi || 0;
+  const total  = emiAmt + extra;
+  const btn    = document.getElementById('btnConfirmEmi');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>PROCESSING…';
+
+  try {
+    const loanRef = doc(db,'loanApplications',currentEmiData.id);
+    const snap    = await getDoc(loanRef);
+    const lData   = snap.data();
+    const history = lData.emiHistory || [];
+    const emisPaid= (lData.emisPaid||0) + 1;
+    const totalPaid    = (lData.totalPaid||0) + total;
+    const remainingAmt = Math.max(0,(lData.remainingAmount||lData.loanAmount) - total);
+    const now = new Date();
+
+    history.push({
+      emiNo:  emisPaid,
+      amount: emiAmt,
+      paidAt: now.toISOString(),
+      status: 'paid',
+      type:   'emi'
+    });
+    if (extra > 0) history.push({ emiNo: emisPaid, amount: extra, paidAt: now.toISOString(), status:'paid', type:'extra' });
+
+    const nextDue = new Date(now); nextDue.setMonth(nextDue.getMonth()+1);
+
+    await updateDoc(loanRef, {
+      emisPaid, totalPaid, remainingAmount: remainingAmt,
+      emiHistory: history,
+      nextDue: nextDue.toLocaleDateString('en-IN'),
+      status: emisPaid >= lData.tenure ? 'completed' : 'active'
+    });
+
+    // Update credit score (+5 on time)
+    const userRef = doc(db,'users',currentUser.uid);
+    await updateDoc(userRef, { creditScore: increment(5) });
+
+    closeEmiModal();
+    showToast('EMI of ₹'+fmt(total)+' paid successfully! +5 credit score','ok');
+    await loadUserData(currentUser.uid);
+    await loadUserLoans(currentUser.uid);
+    renderDashboard(); renderLoans(); renderEmiSection();
+  } catch(e) {
+    btn.disabled=false; btn.innerHTML='CONFIRM PAYMENT';
+    console.error(e); showToast('Payment failed: '+e.message,'err');
+  }
+};
+
+// ── Loan Application ──
+let apStep = 1;
+let guarantorUID = null;
+
+window.applyStep = function(n) {
+  // Validate current step before moving forward
+  if (n > apStep) {
+    if (apStep===1 && !validateApplyStep1()) return;
+    if (apStep===2 && !validateApplyStep2()) return;
+    if (apStep===3 && !validateApplyStep3()) return;
+  }
+  apStep = n;
+  for(let i=1;i<=4;i++){
+    document.getElementById('ap-s'+i).classList.toggle('active',i===n);
+    const d = document.getElementById('ap-d'+i);
+    d.classList.remove('on','done');
+    if(i<n) d.classList.add('done');
+    if(i===n) d.classList.add('on');
+    if(i<=3) document.getElementById('ap-l'+i).classList.toggle('done',i<n);
+  }
+  if(n===4) buildApplyReview();
+};
+
+function validateApplyStep1() {
+  const amt    = parseFloat(document.getElementById('ap-amount').value);
+  const tenure = document.getElementById('ap-tenure').value;
+  const purp   = document.getElementById('ap-purpose').value;
+  const emp    = document.getElementById('ap-employment').value;
+  const income = parseFloat(document.getElementById('ap-income').value);
+  let ok = true;
+  const se=(id,v)=>{document.getElementById(id).classList.toggle('show',v);if(v)ok=false};
+  se('ap-amountErr', !amt||amt<5000||amt>500000);
+  se('ap-tenureErr', !tenure);
+  se('ap-purposeErr',!purp);
+  se('ap-empErr',    !emp);
+  se('ap-incomeErr', !income||income<=0);
+  return ok;
+}
+
+function validateApplyStep2() {
+  const salary = document.getElementById('doc-salary').files[0];
+  document.getElementById('ap-salaryErr').classList.toggle('show',!salary);
+  return !!salary;
+}
+
+function validateApplyStep3() {
+  if (!guarantorData) {
+    document.getElementById('ap-guarantorErr').style.display='block';
+    showToast('Please verify a guarantor first','err');
+    return false;
+  }
+  if (guarantorData.kycStatus !== 'verified') {
+    showToast("Guarantor's KYC is not verified",'err');
+    return false;
+  }
+  return true;
+}
+
+window.calcEMI = function() {
+  const P = parseFloat(document.getElementById('ap-amount').value)||0;
+  const n = parseInt(document.getElementById('ap-tenure').value)||0;
+  if(!P||!n) { document.getElementById('emiCalcBox').style.display='none'; return; }
+  const annualRate = n >= 24 ? 10 : 12;
+  const r = annualRate / 12 / 100;
+  const emi = P * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
+  const totalPay = emi * n;
+  const interest = totalPay - P;
+  document.getElementById('emiCalcBox').style.display='block';
+  document.getElementById('c-principal').textContent = '₹'+fmt(P);
+  document.getElementById('c-rate').textContent      = annualRate+'% p.a. '+(n>=24?'(≥2yr rate)':'(1yr rate)');
+  document.getElementById('c-interest').textContent  = '₹'+fmt(interest);
+  document.getElementById('c-emi').textContent       = '₹'+fmt(emi);
+  document.getElementById('c-total').textContent     = '₹'+fmt(totalPay);
+};
+
+window.lookupGuarantor = async function() {
+  const uid = document.getElementById('ap-guarantor').value.trim().toUpperCase();
+  document.getElementById('ap-guarantorErr').style.display='none';
+  document.getElementById('guarantorPreview').style.display='none';
+  guarantorData = null; guarantorUID = null;
+
+  if (!uid) { showToast('Enter a Member ID','err'); return; }
+  if (uid === (userData?.uniqueUserNumber||'').toUpperCase()) { showToast('You cannot be your own guarantor','err'); return; }
+
+  try {
+    const q    = query(collection(db,'users'), where('uniqueUserNumber','==',uid));
+    const snap = await getDocs(q);
+    if (snap.empty) { document.getElementById('ap-guarantorErr').style.display='block'; return; }
+    const gData = snap.docs[0].data();
+    guarantorData = { ...gData, uid: snap.docs[0].id };
+    guarantorUID  = uid;
+
+    document.getElementById('g-name').textContent  = gData.name||'—';
+    document.getElementById('g-score').textContent = gData.creditScore||'—';
+    document.getElementById('g-uid').textContent   = gData.uniqueUserNumber||uid;
+    const kycEl = document.getElementById('g-kyc');
+    kycEl.textContent = gData.kycStatus==='verified'?'✓ Verified':'Not Verified';
+    kycEl.style.color = gData.kycStatus==='verified'?'var(--green)':'var(--red)';
+    document.getElementById('guarantorPreview').style.display='block';
+  } catch(e) { showToast('Error: '+e.message,'err'); }
+};
+
+function buildApplyReview() {
+  const P = parseFloat(document.getElementById('ap-amount').value)||0;
+  const n = parseInt(document.getElementById('ap-tenure').value)||0;
+  const r = (n>=24?10:12)/12/100;
+  const emi = n>0&&P>0 ? P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1) : 0;
+  const totalPay = emi*n;
+  const interest = totalPay-P;
+
+  document.getElementById('ap-review').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px">
+      ${[
+        ['Loan Amount','₹'+fmt(P)],
+        ['Tenure',document.getElementById('ap-tenure').value+' months'],
+        ['Purpose',document.getElementById('ap-purpose').value],
+        ['Employment',document.getElementById('ap-employment').value],
+        ['Monthly Income','₹'+fmt(parseFloat(document.getElementById('ap-income').value)||0)],
+        ['Interest Rate',(n>=24?'10':'12')+'% p.a.'],
+        ['Monthly EMI','₹'+fmt(emi)],
+        ['Total Interest','₹'+fmt(interest)],
+        ['Total Payable','₹'+fmt(totalPay)],
+        ['Guarantor',guarantorUID+' ('+guarantorData?.name+')'],
+      ].map(([l,v])=>`<div><div style="font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim)">${l}</div><div style="font-family:'Cinzel',serif;font-size:.85rem;color:var(--ivory);margin-top:2px">${v}</div></div>`).join('')}
+    </div>`;
+}
+
+window.submitLoanApplication = async function() {
+  if (!currentUser || !userData || !guarantorData) return;
+  const btn = document.getElementById('btnSubmitLoan');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>SUBMITTING…';
+
+  try {
+    // Upload salary doc to Cloudinary with progress
+    const salaryFile = document.getElementById('doc-salary').files[0];
+    let salaryUrl = '';
+    if (salaryFile) {
+      showToast('Uploading salary document…', 'info');
+      salaryUrl = await uploadToCloudinary(salaryFile, pct => {
+        document.getElementById('salary-name').textContent = 'Uploading… ' + pct + '%';
+      });
+      document.getElementById('salary-name').textContent = '✓ Uploaded';
+    }
+
+    const P = parseFloat(document.getElementById('ap-amount').value)||0;
+    const n = parseInt(document.getElementById('ap-tenure').value)||0;
+    const r = (n>=24?10:12)/12/100;
+    const emi = P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+    const totalPay = emi*n;
+
+    // Generate Loan ID
+    const loanNum = await genLoanId();
+
+    const loanData = {
+      borrowerId:            currentUser.uid,
+      borrowerName:          userData.name,
+      borrowerUniqueNumber:  userData.uniqueUserNumber,
+      borrowerCreditScore:   userData.creditScore||650,
+      guarantorId:           guarantorData.uid,
+      guarantorUniqueNumber: guarantorUID,
+      guarantorName:         guarantorData.name,
+      loanId:                loanNum,
+      loanAmount:            P,
+      tenure:                n,
+      interestRate:          n>=24?10:12,
+      emi:                   Math.round(emi*100)/100,
+      totalPayable:          Math.round(totalPay*100)/100,
+      totalInterest:         Math.round((totalPay-P)*100)/100,
+      remainingAmount:       P,
+      purpose:               document.getElementById('ap-purpose').value,
+      employmentType:        document.getElementById('ap-employment').value,
+      monthlyIncome:         parseFloat(document.getElementById('ap-income').value)||0,
+      salaryProofUrl:        salaryUrl,
+      guarantorStatus:       'pending',
+      adminStatus:           'pending',
+      emisPaid:              0,
+      totalPaid:             0,
+      emiHistory:            [],
+      createdAt:             new Date().toISOString(),
+    };
+
+    const ref = await addDoc(collection(db,'loanApplications'), loanData);
+
+    // Notify guarantor
+    await addDoc(collection(db,'guarantorRequests'), {
+      loanDocId:        ref.id,
+      loanId:           loanNum,
+      guarantorId:      guarantorData.uid,
+      borrowerName:     userData.name,
+      borrowerNumber:   userData.uniqueUserNumber,
+      borrowerScore:    userData.creditScore||650,
+      loanAmount:       P,
+      emi:              Math.round(emi*100)/100,
+      tenure:           n,
+      interestRate:     n>=24?10:12,
+      status:           'pending',
+      createdAt:        new Date().toISOString(),
+    });
+
+    // Initial chat message
+    await addDoc(collection(db,'chatMessages'), {
+      loanId:    ref.id,
+      senderId:  'system',
+      senderName:'System',
+      message:   `Loan application ${loanNum} submitted. Awaiting guarantor approval.`,
+      timestamp: new Date().toISOString(),
+    });
+
+    btn.disabled=false; btn.textContent='SUBMIT APPLICATION';
+    showToast('Application '+loanNum+' submitted! Guarantor notified.','ok');
+
+    // Reset form
+    apStep=1; guarantorData=null; guarantorUID=null;
+    applyStep(1);
+    document.getElementById('ap-amount').value='';
+    document.getElementById('ap-tenure').value='';
+    document.getElementById('ap-purpose').value='';
+    document.getElementById('ap-employment').value='';
+    document.getElementById('ap-income').value='';
+    document.getElementById('emiCalcBox').style.display='none';
+
+    await loadUserLoans(currentUser.uid);
+    renderDashboard(); renderLoans(); renderEmiSection(); populateChatSelect();
+    showSection('myloans');
+  } catch(e) {
+    btn.disabled=false; btn.textContent='SUBMIT APPLICATION';
+    console.error(e); showToast('Error: '+e.message,'err');
+  }
+};
+
+async function genLoanId() {
+  const ref = doc(db,'meta','loanCounter');
+  const snap = await getDoc(ref);
+  const n = (snap.exists()?snap.data().lastNumber:1000)+1;
+  await setDoc(ref,{lastNumber:n},{merge:true});
+  return 'LN'+n;
+}
+
+// ── Chat ──
+window.populateChatSelect = function() {
+  const sel = document.getElementById('chatLoanSelect');
+  sel.innerHTML = '<option value="">— Select a loan —</option>';
+  userLoans.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value       = l.id;
+    opt.textContent = (l.loanId||l.id.slice(0,8).toUpperCase()) + ' — ₹'+fmt(l.loanAmount);
+    sel.appendChild(opt);
+  });
+};
+
+window.loadChat = function(loanId) {
+  if (!loanId) return;
+  currentChatLoanId = loanId;
+  if (chatUnsub) chatUnsub();
+  const q = query(collection(db,'chatMessages'), where('loanId','==',loanId), orderBy('timestamp','asc'));
+  chatUnsub = onSnapshot(q, snap => {
+    const el = document.getElementById('chatMessages');
+    if (snap.empty) { el.innerHTML='<div class="empty" style="margin:auto"><div class="empty-icon">💬</div><div class="empty-text">No messages yet. Start the conversation.</div></div>'; return; }
+    el.innerHTML = snap.docs.map(d => {
+      const m = d.data();
+      const mine = m.senderId === currentUser?.uid;
+      const isSystem = m.senderId==='system';
+      if (isSystem) return `<div style="text-align:center;font-size:.72rem;color:var(--muted);font-family:'Cormorant Garamond',serif;font-style:italic;padding:4px">${m.message}</div>`;
+      return `<div class="chat-msg ${mine?'mine':'theirs'}">
+        <div class="msg-who">${mine?'You':m.senderName||'Admin'}</div>
+        ${m.message}
+        <div class="msg-time">${m.timestamp?new Date(m.timestamp).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):''}</div>
+      </div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  });
+};
+
+window.sendChat = async function() {
+  const input = document.getElementById('chatInput');
+  const msg   = input.value.trim();
+  if (!msg || !currentChatLoanId || !currentUser) return;
+  input.value = '';
+  try {
+    await addDoc(collection(db,'chatMessages'), {
+      loanId:     currentChatLoanId,
+      senderId:   currentUser.uid,
+      senderName: userData?.name || 'User',
+      message:    msg,
+      timestamp:  new Date().toISOString(),
+    });
+  } catch(e) { showToast('Failed to send: '+e.message,'err'); }
+};
+
+// ── Profile Photo Upload ──
+window.uploadProfilePhoto = async function(input) {
+  const file = input.files[0];
+  if (!file || !currentUser) return;
+  if (!file.type.startsWith('image/')) {
+    showToast('Please upload a JPG or PNG image only', 'err');
+    input.value = '';
+    return;
+  }
+
+  const progressEl = document.getElementById('photoProgress');
+  const fillEl     = document.getElementById('photoFill');
+  const pctTextEl  = document.getElementById('photoPctText');
+  const ringArc    = document.getElementById('photoRingArc');
+  const hintEl     = document.getElementById('photoHint');
+  const badgeEl    = document.getElementById('photoBadge');
+  const CIRC = 276.46;
+
+  // Show all progress UI
+  progressEl.style.display = 'block';
+  if (hintEl)  hintEl.style.display  = 'none';
+  if (badgeEl) badgeEl.style.display = 'none';
+  fillEl.style.width = '0%';
+  pctTextEl.textContent = 'Uploading… 0%';
+  if (ringArc) ringArc.style.strokeDashoffset = CIRC;
+
+  // Instant local preview
+  const reader = new FileReader();
+  reader.onload = e => {
+    ['sbAvatar', 'pAvatar'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent           = '';
+      el.innerHTML             = '';
+      el.style.backgroundImage    = 'url("' + e.target.result + '")';
+      el.style.backgroundSize     = 'cover';
+      el.style.backgroundPosition = 'center';
+      el.style.backgroundRepeat   = 'no-repeat';
+      el.style.color              = 'transparent';
+    });
+  };
+  reader.readAsDataURL(file);
+
+  try {
+    const url = await uploadToCloudinary(file, pct => {
+      fillEl.style.width    = pct + '%';
+      pctTextEl.textContent = 'Uploading… ' + pct + '%';
+      if (ringArc) ringArc.style.strokeDashoffset = CIRC - (CIRC * pct / 100);
+    });
+
+    await updateDoc(doc(db, 'users', currentUser.uid), { photoUrl: url });
+    if (userData) userData.photoUrl = url;
+
+    // Completion state
+    fillEl.style.width    = '100%';
+    pctTextEl.textContent = '✓ Photo updated!';
+    if (ringArc) ringArc.style.strokeDashoffset = '0';
+
+    setTimeout(() => {
+      progressEl.style.display = 'none';
+      if (hintEl)  hintEl.style.display  = 'block';
+      if (badgeEl) badgeEl.style.display = 'flex';
+      if (ringArc) ringArc.style.strokeDashoffset = CIRC;
+    }, 2000);
+
+    showToast('Profile photo updated!', 'ok');
+  } catch(e) {
+    progressEl.style.display = 'none';
+    if (hintEl)  hintEl.style.display  = 'block';
+    if (badgeEl) badgeEl.style.display = 'flex';
+    if (ringArc) ringArc.style.strokeDashoffset = CIRC;
+    showToast('Upload failed: ' + e.message, 'err');
+  }
+};
+
+// ── KYC Upload with Progress ──
+window.uploadKYC = async function(input, type) {
+  const file = input.files[0];
+  if (!file || !currentUser) return;
+  if (!file.type.startsWith('image/')) {
+    showToast('Please upload a JPG or PNG image — no PDFs', 'err');
+    input.value = '';
+    return;
+  }
+
+  const statusEl   = document.getElementById(type==='aadhaar' ? 'aadhaarStatus' : 'panStatus');
+  const progressEl = document.getElementById(type==='aadhaar' ? 'aadhaarProgress' : 'panProgress');
+  const fillEl     = document.getElementById(type==='aadhaar' ? 'aadhaarFill' : 'panFill');
+  const pctEl      = document.getElementById(type==='aadhaar' ? 'aadhaarPct' : 'panPct');
+  const previewEl  = document.getElementById(type + 'Preview');
+
+  statusEl.textContent     = 'Uploading…';
+  statusEl.className       = 'badge amber';
+  progressEl.style.display = 'block';
+  fillEl.style.width       = '0%';
+  pctEl.textContent        = '0%';
+
+  // Instant local preview
+  const reader = new FileReader();
+  reader.onload = e => { previewEl.src = e.target.result; previewEl.style.display = 'block'; };
+  reader.readAsDataURL(file);
+
+  try {
+    const url = await uploadToCloudinary(file, pct => {
+      fillEl.style.width = pct + '%';
+      pctEl.textContent  = pct + '%';
+    });
+
+    await updateDoc(doc(db, 'users', currentUser.uid), {
+      [type==='aadhaar' ? 'aadhaarUrl' : 'panUrl']: url,
+      kycStatus: 'submitted',
+    });
+
+    previewEl.src            = url;
+    previewEl.style.display  = 'block';
+    statusEl.textContent     = '✓ Uploaded';
+    statusEl.className       = 'badge green';
+    progressEl.style.display = 'none';
+    showToast(type.toUpperCase() + ' uploaded! Awaiting admin verification.', 'ok');
+    await loadUserData(currentUser.uid);
+  } catch(e) {
+    statusEl.textContent     = 'Failed';
+    statusEl.className       = 'badge red';
+    progressEl.style.display = 'none';
+    showToast('Upload failed: ' + e.message, 'err');
+  }
+};
+
+// ── Profile Save ──
+window.saveProfile = async function() {
+  if (!currentUser) return;
+  const name    = document.getElementById('edit-name').value.trim();
+  const phone   = document.getElementById('edit-phone').value.trim();
+  const address = document.getElementById('edit-address').value.trim();
+  const dob     = document.getElementById('edit-dob').value;
+  if (!name) { showToast('Name cannot be empty','err'); return; }
+  try {
+    await updateDoc(doc(db,'users',currentUser.uid), { name, phone, address, dateOfBirth:dob });
+    await updateProfile(currentUser, { displayName:name });
+    await loadUserData(currentUser.uid);
+    showToast('Profile updated successfully','ok');
+  } catch(e) { showToast('Error: '+e.message,'err'); }
+};
+
+// ── Sign out ──
+window.signOut = async function() {
+  await fbSignOut(auth);
+  window.location.href = '../index.html';
+};
+
+// ── Cloudinary Upload with Progress ──
+function uploadToCloudinary(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', 'finlend_unsigned');
+    // NOTE: Do NOT send api_key with unsigned presets — it causes auth errors
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://api.cloudinary.com/v1_1/dhcxxegrs/image/upload');
+
+    xhr.upload.addEventListener('progress', e => {
+      if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded / e.total * 100));
+    });
+
+    xhr.addEventListener('load', () => {
+      console.log('Cloudinary raw response:', xhr.status, xhr.responseText.slice(0, 300));
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (data.secure_url) {
+          console.log('Upload success:', data.secure_url);
+          resolve(data.secure_url);
+        } else {
+          const msg = data.error?.message || JSON.stringify(data);
+          console.error('Cloudinary error object:', data);
+          reject(new Error(msg));
+        }
+      } catch(parseErr) {
+        console.error('JSON parse failed:', xhr.responseText);
+        reject(new Error('Unexpected response from Cloudinary'));
+      }
+    });
+
+    xhr.addEventListener('error', (e) => {
+      console.error('XHR network error:', e);
+      reject(new Error('Network error — check internet connection'));
+    });
+
+    xhr.addEventListener('abort', () => reject(new Error('Upload was aborted')));
+
+    console.log('Starting Cloudinary upload:', file.name, file.size, 'bytes');
+    xhr.send(fd);
+  });
+}
+
+// ── Check apply section prerequisites ──
+window.checkApplyPrereqs = function() {
+  if (!userData) return;
+  const kycOk     = userData.kycStatus === 'verified';
+  const hasActive = userLoans.some(l => l.adminStatus==='approved' || (l.adminStatus==='pending' && l.guarantorStatus!=='rejected'));
+  document.getElementById('kycWarning').style.display        = kycOk?'none':'block';
+  document.getElementById('existingLoanWarning').style.display = hasActive?'block':'none';
+  document.getElementById('btnSubmitLoan').disabled = !kycOk || hasActive;
+};
+
+// ── Helpers ──
+window.fmt = function(n) {
+  return Math.round(n).toLocaleString('en-IN');
+};
+
+window.showToast = function(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3800);
+};
+
+window.previewFile = function(input, nameId) {
+  const f = input.files[0];
+  if (f) document.getElementById(nameId).textContent = '✓ '+f.name;
+};
+
+// ══════════════════════════════════════════════════
+// NOTIFICATIONS & GUARANTOR REQUESTS LISTENER
+// Queries guarantorRequests where guarantorId == currentUser.uid (Firebase UID)
+// This is correct — guarantorId IS stored as Firebase UID in submitLoanApplication
+// ══════════════════════════════════════════════════
+let notifUnsub = null;
+
+window.startNotificationsListener = function(uid) {
+  if (notifUnsub) notifUnsub();
+  const q = query(
+    collection(db, 'guarantorRequests'),
+    where('guarantorId', '==', uid),   // uid = Firebase UID — matches what's stored
+    orderBy('createdAt', 'desc')
+  );
+  notifUnsub = onSnapshot(q, snap => {
+    const requests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderGuarantorRequests(requests);
+    updateNotifBadge(requests);
+  });
+};
+
+function updateNotifBadge(requests) {
+  const pending  = requests.filter(r => r.status === 'pending').length;
+  const badge    = document.getElementById('notifBadge');
+  const countEl  = document.getElementById('pendingGuarantorCount');
+  if (pending > 0) {
+    badge.textContent   = pending;
+    badge.style.display = 'inline-block';
+    if (countEl) { countEl.textContent = pending + ' pending'; countEl.style.display = 'inline-block'; }
+  } else {
+    badge.style.display = 'none';
+    if (countEl) countEl.style.display = 'none';
+  }
+}
+
+function renderGuarantorRequests(requests) {
+  const el = document.getElementById('guarantorRequestsList');
+  if (!el) return;
+  if (requests.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🤝</div><div class="empty-text">No guarantor requests received</div></div>';
+    return;
+  }
+
+  el.innerHTML = requests.map(r => {
+    const isPending  = r.status === 'pending';
+    const isApproved = r.status === 'approved';
+    const cardColor  = isApproved ? 'var(--green)' : r.status === 'rejected' ? 'var(--red)' : 'var(--amber)';
+    const timeAgo    = r.createdAt ? formatTimeAgo(r.createdAt) : '—';
+    const totalPay   = (r.emi||0) * (r.tenure||0);
+
+    return `<div style="background:var(--card2);border:1px solid var(--border);border-radius:6px;
+                        padding:18px 20px;margin-bottom:14px;position:relative;overflow:hidden" id="ncard-${r.id}">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${cardColor}"></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:.85rem;color:var(--gold);letter-spacing:.05em">Loan Guarantee Request</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:2px">${r.loanId||'—'} · ${timeAgo}</div>
+        </div>
+        <span class="badge ${isPending?'amber':isApproved?'green':'red'}" style="flex-shrink:0">
+          ${isPending ? 'PENDING' : isApproved ? '✓ APPROVED' : '✗ REJECTED'}
+        </span>
+      </div>
+
+      <div style="font-size:.84rem;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:12px">
+        <strong style="color:var(--ivory)">${r.borrowerName||'Someone'}</strong> has requested you as a
+        <strong style="color:var(--gold)">loan guarantor</strong>.
+        By approving, you agree to be responsible if they default on repayment.
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+                  background:rgba(201,168,76,.05);border:1px solid var(--border);
+                  border-radius:5px;padding:10px 14px;margin-bottom:12px">
+        ${[
+          ['Borrower',    r.borrowerName||'—'],
+          ['Member ID',   r.borrowerNumber||'—'],
+          ['Credit Score',r.borrowerScore||'—'],
+          ['Loan Amount', '₹'+(r.loanAmount||0).toLocaleString('en-IN')],
+          ['Monthly EMI', '₹'+(r.emi||0).toLocaleString('en-IN')],
+          ['Tenure',      (r.tenure||'—')+' Months'],
+          ['Interest',    (r.interestRate||'—')+'%'],
+          ['Total Payable','₹'+Math.round(totalPay).toLocaleString('en-IN')],
+        ].map(([l,v]) => `<div>
+          <div style="font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:2px">${l}</div>
+          <div style="font-family:'Cinzel',serif;font-size:.8rem;color:var(--ivory)">${v}</div>
+        </div>`).join('')}
+      </div>
+
+      ${isPending ? `
+      <div style="background:rgba(255,183,77,.07);border:1px solid rgba(255,183,77,.2);
+                  border-radius:5px;padding:10px 14px;font-size:.78rem;
+                  color:rgba(255,183,77,.85);margin-bottom:12px">
+        ⚠️ Approving sends this loan to admin for final review. Rejecting cancels the application.
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-green" onclick="respondToGuarantor('${r.id}','${r.loanDocId}','approved')">
+          ✓ APPROVE GUARANTEE
+        </button>
+        <button class="btn btn-red" onclick="respondToGuarantor('${r.id}','${r.loanDocId}','rejected')">
+          ✗ REJECT
+        </button>
+      </div>` : `
+      <div style="font-size:.78rem;color:var(--muted);font-family:'Cormorant Garamond',serif;font-style:italic">
+        ${isApproved
+          ? '✓ You approved this request. Application sent to admin.'
+          : '✗ You rejected this request. Application was cancelled.'}
+      </div>`}
+    </div>`;
+  }).join('');
+}
+
+window.respondToGuarantor = async function(requestId, loanDocId, decision) {
+  const btn1 = document.querySelector(`#ncard-${requestId} .btn-green`);
+  const btn2 = document.querySelector(`#ncard-${requestId} .btn-red`);
+  if (btn1) btn1.disabled = true;
+  if (btn2) btn2.disabled = true;
+
+  try {
+    // 1. Update the guarantorRequest status
+    await updateDoc(doc(db, 'guarantorRequests', requestId), {
+      status:      decision,
+      respondedAt: new Date().toISOString(),
+    });
+
+    // 2. Update the loanApplication
+    if (loanDocId) {
+      await updateDoc(doc(db, 'loanApplications', loanDocId), {
+        guarantorStatus: decision,
+        adminStatus:     decision === 'approved' ? 'pending' : 'rejected',
+      });
+
+      // 3. Post system message in loan chat
+      await addDoc(collection(db, 'chatMessages'), {
+        loanId:     loanDocId,
+        senderId:   'system',
+        senderName: 'System',
+        message:    decision === 'approved'
+          ? `Guarantor ${userData?.name||''} (${userData?.uniqueUserNumber||''}) approved the request. Application sent to admin for review.`
+          : `Guarantor ${userData?.name||''} (${userData?.uniqueUserNumber||''}) rejected the request. Loan application has been cancelled.`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    showToast(
+      decision === 'approved'
+        ? '✓ Guarantee approved! Admin will now review the loan.'
+        : '✗ Request rejected. Borrower has been notified.',
+      decision === 'approved' ? 'ok' : 'err'
+    );
+  } catch(e) {
+    console.error(e);
+    if (btn1) btn1.disabled = false;
+    if (btn2) btn2.disabled = false;
+    showToast('Error: ' + e.message, 'err');
+  }
+};
+
+window.renderLoanNotifications = function() {
+  const el = document.getElementById('loanNotifList');
+  if (!el || !userLoans.length) {
+    if (el) el.innerHTML = '<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">No notifications yet</div></div>';
+    return;
+  }
+  const notifs = [];
+  userLoans.forEach(l => {
+    const id   = l.loanId || l.id.slice(0,8).toUpperCase();
+    const date = l.createdAt ? formatTimeAgo(l.createdAt) : '—';
+    notifs.push({ icon:'📋', text:`Loan application <strong style="color:var(--gold)">${id}</strong> submitted successfully.`, date });
+    if (l.guarantorStatus==='approved')
+      notifs.push({ icon:'✅', text:`Guarantor approved loan <strong style="color:var(--green)">${id}</strong>. Awaiting admin review.`, date });
+    if (l.guarantorStatus==='rejected')
+      notifs.push({ icon:'❌', text:`Guarantor rejected loan <strong style="color:var(--red)">${id}</strong>.`, date });
+    if (l.adminStatus==='approved')
+      notifs.push({ icon:'🎉', text:`Admin <strong style="color:var(--green)">approved</strong> loan <strong style="color:var(--gold)">${id}</strong>! Funds disbursed.`, date });
+    if (l.adminStatus==='rejected')
+      notifs.push({ icon:'🚫', text:`Admin <strong style="color:var(--red)">rejected</strong> loan <strong style="color:var(--gold)">${id}</strong>.`, date });
+  });
+
+  if (notifs.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">No notifications yet</div></div>';
+    return;
+  }
+
+  el.innerHTML = notifs.map(n => `
+    <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border2);align-items:flex-start">
+      <div style="font-size:1.3rem;flex-shrink:0;margin-top:2px">${n.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:.84rem;color:rgba(255,255,255,.75);line-height:1.5">${n.text}</div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:3px;font-family:'Cormorant Garamond',serif;font-style:italic">${n.date}</div>
+      </div>
+    </div>`).join('');
+};
+
+function formatTimeAgo(iso) {
+  try {
+    const d    = new Date(typeof iso==='object'&&iso.seconds ? iso.seconds*1000 : iso);
+    const diff = Date.now() - d.getTime();
+    const mins = Math.floor(diff/60000);
+    if (mins < 1)  return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins/60);
+    if (hrs < 24)  return hrs + 'h ago';
+    return d.toLocaleDateString('en-IN');
+  } catch { return '—'; }
+}
+</script>
+
+<!-- NON-MODULE script -->
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  const btn = document.querySelector(`.nav-item[onclick*="${id}"]`);
+  if (btn) btn.classList.add('active');
+  const titles = {
+    dashboard:'Dashboard', myloans:'My Loans', apply:'Apply for Loan',
+    emi:'EMI Payments', chat:'Chat with Admin',
+    notifications:'Notifications', profile:'Profile & KYC'
+  };
+  document.getElementById('topbarTitle').textContent = titles[id]||id;
+  if (id==='apply')         { if(window.checkApplyPrereqs)      window.checkApplyPrereqs(); }
+  if (id==='notifications') { if(window.renderLoanNotifications) window.renderLoanNotifications(); }
+  if (id==='profile')       { /* profile already loaded */ }
+  window.scrollTo?.(0,0);
+  document.getElementById('mainContent').scrollTop=0;
+}
+
+function toggleEye(id, btn) {
+  const inp=document.getElementById(id);
+  inp.type=inp.type==='password'?'text':'password';
+}
+</script>
+</body>
+</html>
